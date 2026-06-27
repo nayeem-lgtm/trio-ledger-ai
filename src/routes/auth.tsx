@@ -70,7 +70,7 @@ function AuthPage() {
           <div className="h-8 w-8 rounded-lg bg-primary/15 grid place-items-center">
             <Layers className="h-4 w-4 text-primary" />
           </div>
-          <span className="font-semibold tracking-tight">Ledger AI</span>
+          <span className="font-semibold tracking-tight">Cash Flow</span>
         </Link>
         <Card>
           <CardHeader>
