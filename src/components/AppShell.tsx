@@ -65,9 +65,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Layers className="h-4 w-4 text-primary-foreground" />
           </div>
           <div className="leading-tight flex-1">
-            <div className="font-display font-semibold tracking-tight text-[15px]">Ledger</div>
+            <div className="font-display font-semibold tracking-tight text-[15px]">Cashflow</div>
             <div className="text-[10px] uppercase tracking-[0.18em] text-sidebar-foreground/50">
-              Cash Flow
+              Accounting
             </div>
           </div>
           <ThemeToggle compact />
