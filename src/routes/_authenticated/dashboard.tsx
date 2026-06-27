@@ -84,10 +84,12 @@ function Overview() {
 
   const trend = useMemo(() => {
     const out: { month: string; income: number; expense: number; net: number }[] = [];
+    const anchor = range.to;
     for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const r = monthRange(d.getFullYear(), d.getMonth());
-      const rows = txns.filter((t) => t.transaction_date >= r.start && t.transaction_date < r.end);
+      const d = new Date(anchor.getFullYear(), anchor.getMonth() - i, 1);
+      const monthStart = isoDay(d);
+      const monthEnd = isoDay(new Date(d.getFullYear(), d.getMonth() + 1, 1));
+      const rows = txns.filter((t) => t.transaction_date >= monthStart && t.transaction_date < monthEnd);
       const inc = sum(rows, "income");
       const exp = sum(rows, "expense");
       out.push({
@@ -98,7 +100,7 @@ function Overview() {
       });
     }
     return out;
-  }, [txns, now]);
+  }, [txns, range.to]);
 
   const recent = useMemo(() => txns.slice(0, 6), [txns]);
 
@@ -111,13 +113,15 @@ function Overview() {
             Consolidated Overview
           </div>
           <h1 className="font-display text-[34px] leading-none font-semibold tracking-tight">
-            {fmtMonth(now)}
+            {fmtRange(range)}
           </h1>
           <p className="text-sm text-muted-foreground mt-2">
             {businesses.length} entities · {inMonth.length} transactions this period
           </p>
         </div>
-        <Button onClick={() => setOpen(true)} className="gap-2 shadow-soft">
+        <div className="flex gap-2 items-center flex-wrap">
+          <DateRangePicker value={range} onChange={setRange} />
+          <Button onClick={() => setOpen(true)} className="gap-2 shadow-soft">
           <Plus className="h-4 w-4" /> Record entry
         </Button>
       </header>
