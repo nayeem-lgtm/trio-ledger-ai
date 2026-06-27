@@ -36,9 +36,11 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 
 function Overview() {
   const [open, setOpen] = useState(false);
-  const [now] = useState(() => new Date());
-  const { start, end } = monthRange(now.getFullYear(), now.getMonth());
-  const prev = monthRange(now.getFullYear(), now.getMonth() - 1);
+  const [range, setRange] = useState<DateRange>(() => buildPreset("this_month"));
+
+  const { start, end } = rangeToIso(range);
+  const prevRange = previousRange(range);
+  const prevIso = rangeToIso(prevRange);
 
   const { data: businesses = [] } = useQuery(businessesQuery);
   const { data: txns = [] } = useQuery(transactionsQuery());
@@ -48,8 +50,8 @@ function Overview() {
     [txns, start, end],
   );
   const inPrev = useMemo(
-    () => txns.filter((t) => t.transaction_date >= prev.start && t.transaction_date < prev.end),
-    [txns, prev.start, prev.end],
+    () => txns.filter((t) => t.transaction_date >= prevIso.start && t.transaction_date < prevIso.end),
+    [txns, prevIso.start, prevIso.end],
   );
 
   const sum = (rows: any[], type: string) =>
