@@ -11,7 +11,7 @@ export const Route = createFileRoute("/")({
   },
   head: () => ({
     meta: [
-      { title: "Ledger AI — Multi-Business Accounting" },
+      { title: "Cash Flow — Multi-Business Accounting" },
       {
         name: "description",
         content:
@@ -31,7 +31,7 @@ function Landing() {
             <div className="h-8 w-8 rounded-lg bg-primary/15 grid place-items-center">
               <Layers className="h-4 w-4 text-primary" />
             </div>
-            <span className="font-semibold tracking-tight">Ledger AI</span>
+            <span className="font-semibold tracking-tight">Cash Flow</span>
           </div>
           <Link to="/auth">
             <Button variant="secondary">Sign in</Button>
