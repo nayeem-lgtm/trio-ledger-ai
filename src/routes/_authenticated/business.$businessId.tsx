@@ -4,9 +4,17 @@ import { businessesQuery, categoriesQuery, transactionsQuery } from "@/lib/queri
 import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { fmtMoney, fmtMonth, monthRange } from "@/lib/format";
+import {
+  fmtMoney,
+  fmtRange,
+  buildPreset,
+  rangeToIso,
+  isoDay,
+  type DateRange,
+} from "@/lib/format";
 import { Plus, FileDown, FileSpreadsheet, TrendingUp, TrendingDown, Wallet, Sparkles, Loader2 } from "lucide-react";
 import { TransactionDialog } from "@/components/TransactionDialog";
+import { DateRangePicker } from "@/components/DateRangePicker";
 import { downloadCSV, downloadPDF, type ReportTxn } from "@/lib/reports";
 import {
   ResponsiveContainer,
@@ -21,7 +29,6 @@ import {
   Cell,
   Legend,
 } from "recharts";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useServerFn } from "@tanstack/react-start";
 import { monthlyInsight } from "@/lib/ai.functions";
 import { toast } from "sonner";
