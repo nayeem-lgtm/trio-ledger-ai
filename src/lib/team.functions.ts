@@ -10,7 +10,7 @@ export type MembershipRow = {
   member_user_id: string;
   role: TeamRole;
   email: string | null;
-  display_name: string | null;
+  full_name: string | null;
 };
 
 export type InviteRow = {
@@ -38,13 +38,13 @@ export const listWorkspaces = createServerFn({ method: "GET" })
 
     const { data: me } = await supabase
       .from("profiles")
-      .select("id, email, display_name")
+      .select("id, email, full_name")
       .eq("id", userId)
       .maybeSingle();
     out.push({
       owner_id: userId,
       owner_email: me?.email ?? null,
-      owner_name: me?.display_name ?? me?.email ?? "My workspace",
+      owner_name: me?.full_name ?? me?.email ?? "My workspace",
       role: "admin",
       is_self: true,
     });
@@ -59,7 +59,7 @@ export const listWorkspaces = createServerFn({ method: "GET" })
       const ownerIds = memberships.map((m) => m.owner_id);
       const { data: owners } = await supabase
         .from("profiles")
-        .select("id, email, display_name")
+        .select("id, email, full_name")
         .in("id", ownerIds);
       const byId = new Map((owners ?? []).map((p) => [p.id, p]));
       for (const m of memberships) {
@@ -67,7 +67,7 @@ export const listWorkspaces = createServerFn({ method: "GET" })
         out.push({
           owner_id: m.owner_id,
           owner_email: p?.email ?? null,
-          owner_name: p?.display_name ?? p?.email ?? "Shared workspace",
+          owner_name: p?.full_name ?? p?.email ?? "Shared workspace",
           role: m.role as TeamRole,
           is_self: false,
         });
@@ -90,7 +90,7 @@ export const listTeamMembers = createServerFn({ method: "GET" })
     const ids = rows.map((r) => r.member_user_id);
     const { data: profiles } = await supabase
       .from("profiles")
-      .select("id, email, display_name")
+      .select("id, email, full_name")
       .in("id", ids);
     const byId = new Map((profiles ?? []).map((p) => [p.id, p]));
     return rows.map((r) => ({
@@ -99,7 +99,7 @@ export const listTeamMembers = createServerFn({ method: "GET" })
       member_user_id: r.member_user_id,
       role: r.role as TeamRole,
       email: byId.get(r.member_user_id)?.email ?? null,
-      display_name: byId.get(r.member_user_id)?.display_name ?? null,
+      full_name: byId.get(r.member_user_id)?.full_name ?? null,
     }));
   });
 
