@@ -11,6 +11,7 @@ import {
   LogOut,
   Briefcase,
   PlusCircle,
+  Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     { to: "/transactions", label: "Transactions", icon: ListPlus },
     { to: "/categories", label: "Categories", icon: Tags },
     { to: "/ai", label: "AI Assistant", icon: Sparkles },
+    { to: "/settings", label: "Settings", icon: Settings },
   ];
 
   return (

@@ -2,22 +2,69 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
-const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const MODEL = "google/gemini-3-flash-preview";
+type Msg = { role: "system" | "user" | "assistant"; content: string };
 
-async function callAI(messages: { role: string; content: string }[]) {
+async function callAIForUser(supabase: any, userId: string, messages: Msg[]) {
+  const { data: s } = await supabase
+    .from("user_ai_settings")
+    .select("provider, openai_api_key, gemini_api_key, openai_model, gemini_model")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  const provider = (s?.provider as "lovable" | "openai" | "gemini") ?? "lovable";
+
+  if (provider === "openai" && s?.openai_api_key) {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${s.openai_api_key}`,
+      },
+      body: JSON.stringify({
+        model: s.openai_model ?? "gpt-4o-mini",
+        messages,
+      }),
+    });
+    if (!res.ok) throw new Error(`OpenAI error ${res.status}: ${(await res.text()).slice(0, 200)}`);
+    const json = (await res.json()) as { choices: { message: { content: string } }[] };
+    return json.choices[0]?.message?.content ?? "";
+  }
+
+  if (provider === "gemini" && s?.gemini_api_key) {
+    const model = s.gemini_model ?? "gemini-2.0-flash";
+    const sys = messages.filter((m) => m.role === "system").map((m) => m.content).join("\n\n");
+    const contents = messages
+      .filter((m) => m.role !== "system")
+      .map((m) => ({
+        role: m.role === "assistant" ? "model" : "user",
+        parts: [{ text: m.content }],
+      }));
+    const body: any = { contents };
+    if (sys) body.systemInstruction = { parts: [{ text: sys }] };
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${s.gemini_api_key}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      },
+    );
+    if (!res.ok) throw new Error(`Gemini error ${res.status}: ${(await res.text()).slice(0, 200)}`);
+    const json: any = await res.json();
+    return json?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+  }
+
+  // Default: Lovable AI Gateway
   const key = process.env.LOVABLE_API_KEY;
   if (!key) throw new Error("AI gateway not configured");
-  const res = await fetch(GATEWAY, {
+  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${key}`,
-    },
-    body: JSON.stringify({ model: MODEL, messages }),
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+    body: JSON.stringify({ model: "google/gemini-3-flash-preview", messages }),
   });
   if (res.status === 429) throw new Error("AI rate limit hit. Please retry shortly.");
-  if (res.status === 402) throw new Error("AI credits exhausted. Add credits in Workspace Settings.");
+  if (res.status === 402)
+    throw new Error("AI credits exhausted. Add credits in Workspace Settings or set your own API key under Settings.");
   if (!res.ok) throw new Error(`AI error: ${res.status}`);
   const json = (await res.json()) as { choices: { message: { content: string } }[] };
   return json.choices[0]?.message?.content ?? "";
@@ -30,10 +77,11 @@ const SuggestSchema = z.object({
 });
 
 export const suggestCategory = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => SuggestSchema.parse(d))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const list = data.categories.join(", ");
-    const content = await callAI([
+    const content = await callAIForUser(context.supabase, context.userId, [
       {
         role: "system",
         content:
@@ -58,9 +106,9 @@ const InsightSchema = z.object({
 export const monthlyInsight = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => InsightSchema.parse(d))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const lines = data.topExpenses.map((t) => `- ${t.name}: $${t.total.toFixed(2)}`).join("\n");
-    const content = await callAI([
+    const content = await callAIForUser(context.supabase, context.userId, [
       {
         role: "system",
         content:
@@ -74,9 +122,7 @@ export const monthlyInsight = createServerFn({ method: "POST" })
     return { insight: content.trim() };
   });
 
-const QuerySchema = z.object({
-  question: z.string().min(1).max(500),
-});
+const QuerySchema = z.object({ question: z.string().min(1).max(500) });
 
 export const askLedger = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -108,7 +154,7 @@ export const askLedger = createServerFn({ method: "POST" })
       })),
     };
 
-    const content = await callAI([
+    const content = await callAIForUser(supabase, userId, [
       {
         role: "system",
         content:
