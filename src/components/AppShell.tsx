@@ -42,14 +42,22 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen flex bg-background">
       <aside className="w-64 shrink-0 border-r border-sidebar-border bg-sidebar flex flex-col">
-        <div className="px-5 py-5 flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-primary/15 grid place-items-center">
-            <Layers className="h-4 w-4 text-primary" />
+        <div className="px-5 py-5 flex items-center gap-2.5 border-b border-sidebar-border/60">
+          <div className="h-9 w-9 rounded-md gradient-primary grid place-items-center shadow-soft">
+            <Layers className="h-4 w-4 text-primary-foreground" />
           </div>
-          <span className="font-semibold tracking-tight">Ledger AI</span>
+          <div className="leading-tight">
+            <div className="font-display font-semibold tracking-tight text-[15px]">Ledger</div>
+            <div className="text-[10px] uppercase tracking-[0.18em] text-sidebar-foreground/50">
+              Finance OS
+            </div>
+          </div>
         </div>
 
-        <nav className="px-3 space-y-1">
+        <div className="px-5 mt-5 mb-2 text-[10px] uppercase tracking-[0.18em] text-sidebar-foreground/40">
+          Workspace
+        </div>
+        <nav className="px-3 space-y-0.5">
           {nav.map((n) => {
             const active = pathname === n.to;
             return (
@@ -59,8 +67,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                 className={cn(
                   "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
                   active
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
+                    ? "bg-sidebar-accent text-sidebar-accent-foreground border-l-2 border-primary"
+                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground border-l-2 border-transparent",
                 )}
               >
                 <n.icon className="h-4 w-4" />
@@ -71,17 +79,17 @@ export function AppShell({ children }: { children: ReactNode }) {
         </nav>
 
         <div className="px-5 mt-6 mb-2 flex items-center justify-between">
-          <span className="text-xs uppercase tracking-wider text-sidebar-foreground/50">
-            Businesses
+          <span className="text-[10px] uppercase tracking-[0.18em] text-sidebar-foreground/40">
+            Entities
           </span>
           <button
             onClick={() => setOpenBiz(true)}
-            className="text-sidebar-foreground/60 hover:text-sidebar-foreground"
+            className="text-sidebar-foreground/60 hover:text-primary transition-colors"
           >
-            <PlusCircle className="h-4 w-4" />
+            <PlusCircle className="h-3.5 w-3.5" />
           </button>
         </div>
-        <div className="px-3 space-y-1 flex-1 overflow-auto">
+        <div className="px-3 space-y-0.5 flex-1 overflow-auto">
           {businesses.map((b) => {
             const to = `/business/${b.id}`;
             const active = pathname === to;
@@ -94,22 +102,22 @@ export function AppShell({ children }: { children: ReactNode }) {
                   "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
                   active
                     ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
+                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
                 )}
               >
                 <span
-                  className="h-2.5 w-2.5 rounded-full"
+                  className="h-2 w-2 rounded-full ring-2 ring-sidebar"
                   style={{ backgroundColor: b.color }}
                 />
-                <Briefcase className="h-4 w-4 opacity-50" />
                 <span className="truncate">{b.name}</span>
+                <Briefcase className="h-3.5 w-3.5 ml-auto opacity-30" />
               </Link>
             );
           })}
         </div>
 
-        <div className="p-3 border-t border-sidebar-border">
-          <Button variant="ghost" className="w-full justify-start gap-2" onClick={signOut}>
+        <div className="p-3 border-t border-sidebar-border/60">
+          <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-sidebar-foreground/70" onClick={signOut}>
             <LogOut className="h-4 w-4" />
             Sign out
           </Button>
