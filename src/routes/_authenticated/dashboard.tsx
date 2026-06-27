@@ -122,8 +122,9 @@ function Overview() {
         <div className="flex gap-2 items-center flex-wrap">
           <DateRangePicker value={range} onChange={setRange} />
           <Button onClick={() => setOpen(true)} className="gap-2 shadow-soft">
-          <Plus className="h-4 w-4" /> Record entry
-        </Button>
+            <Plus className="h-4 w-4" /> Record entry
+          </Button>
+        </div>
       </header>
 
       {/* Bento grid */}
