@@ -109,6 +109,57 @@ export type Database = {
         }
         Relationships: []
       }
+      team_invites: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          owner_id: string
+          role: Database["public"]["Enums"]["team_role"]
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          owner_id: string
+          role?: Database["public"]["Enums"]["team_role"]
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          owner_id?: string
+          role?: Database["public"]["Enums"]["team_role"]
+          status?: string
+        }
+        Relationships: []
+      }
+      team_members: {
+        Row: {
+          created_at: string
+          id: string
+          member_user_id: string
+          owner_id: string
+          role: Database["public"]["Enums"]["team_role"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          member_user_id: string
+          owner_id: string
+          role?: Database["public"]["Enums"]["team_role"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          member_user_id?: string
+          owner_id?: string
+          role?: Database["public"]["Enums"]["team_role"]
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           amount: number
@@ -204,9 +255,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      accept_my_pending_invites: { Args: never; Returns: number }
+      can_admin_workspace: {
+        Args: { _owner: string; _user: string }
+        Returns: boolean
+      }
+      can_write_workspace: {
+        Args: { _owner: string; _user: string }
+        Returns: boolean
+      }
+      is_workspace_member: {
+        Args: { _owner: string; _user: string }
+        Returns: boolean
+      }
     }
     Enums: {
+      team_role: "admin" | "editor" | "viewer"
       txn_type: "income" | "expense"
     }
     CompositeTypes: {
@@ -335,6 +399,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      team_role: ["admin", "editor", "viewer"],
       txn_type: ["income", "expense"],
     },
   },
