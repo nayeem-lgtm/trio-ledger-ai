@@ -4,9 +4,17 @@ import { businessesQuery, categoriesQuery, transactionsQuery } from "@/lib/queri
 import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { fmtMoney, fmtMonth, monthRange } from "@/lib/format";
+import {
+  fmtMoney,
+  fmtRange,
+  buildPreset,
+  rangeToIso,
+  isoDay,
+  type DateRange,
+} from "@/lib/format";
 import { Plus, FileDown, FileSpreadsheet, TrendingUp, TrendingDown, Wallet, Sparkles, Loader2 } from "lucide-react";
 import { TransactionDialog } from "@/components/TransactionDialog";
+import { DateRangePicker } from "@/components/DateRangePicker";
 import { downloadCSV, downloadPDF, type ReportTxn } from "@/lib/reports";
 import {
   ResponsiveContainer,
@@ -21,7 +29,6 @@ import {
   Cell,
   Legend,
 } from "recharts";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useServerFn } from "@tanstack/react-start";
 import { monthlyInsight } from "@/lib/ai.functions";
 import { toast } from "sonner";
@@ -38,16 +45,14 @@ function BusinessPage() {
 
   const business = businesses.find((b) => b.id === businessId);
 
-  const today = new Date();
-  const [year, setYear] = useState(today.getFullYear());
-  const [month, setMonth] = useState(today.getMonth());
+  const [range, setRange] = useState<DateRange>(() => buildPreset("this_month"));
   const [open, setOpen] = useState(false);
   const [insight, setInsight] = useState<string | null>(null);
   const [insightLoading, setInsightLoading] = useState(false);
   const insightFn = useServerFn(monthlyInsight);
 
-  const { start, end } = monthRange(year, month);
-  const monthDate = new Date(year, month, 1);
+  const { start, end } = rangeToIso(range);
+  const rangeLabel = fmtRange(range);
 
   const monthTxns = useMemo(
     () => txns.filter((t) => t.transaction_date >= start && t.transaction_date < end),
@@ -79,10 +84,12 @@ function BusinessPage() {
 
   const trend = useMemo(() => {
     const out: { month: string; income: number; expense: number }[] = [];
+    const anchor = range.to;
     for (let i = 5; i >= 0; i--) {
-      const d = new Date(year, month - i, 1);
-      const r = monthRange(d.getFullYear(), d.getMonth());
-      const rows = txns.filter((t) => t.transaction_date >= r.start && t.transaction_date < r.end);
+      const d = new Date(anchor.getFullYear(), anchor.getMonth() - i, 1);
+      const mStart = isoDay(d);
+      const mEnd = isoDay(new Date(d.getFullYear(), d.getMonth() + 1, 1));
+      const rows = txns.filter((t) => t.transaction_date >= mStart && t.transaction_date < mEnd);
       out.push({
         month: d.toLocaleString("en-US", { month: "short" }),
         income: rows.filter((t) => t.type === "income").reduce((s, t) => s + Number(t.amount), 0),
@@ -90,7 +97,7 @@ function BusinessPage() {
       });
     }
     return out;
-  }, [txns, year, month]);
+  }, [txns, range.to]);
 
   if (!business && businesses.length > 0) throw notFound();
   if (!business) return null;
@@ -105,11 +112,13 @@ function BusinessPage() {
     business_name: business.name,
   }));
 
+  const safeLabel = rangeLabel.replace(/[^\w-]+/g, "_");
+
   const downloadPdf = () => {
     downloadPDF({
-      filename: `${business.name}-${fmtMonth(monthDate)}.pdf`,
-      title: `${business.name} — Monthly Report`,
-      subtitle: fmtMonth(monthDate),
+      filename: `${business.name}-${safeLabel}.pdf`,
+      title: `${business.name} — Report`,
+      subtitle: rangeLabel,
       totals,
       byCategory: byCategory.map((c) => ({ name: c.name, total: c.total, type: c.type })),
       rows: reportRows,
@@ -117,7 +126,7 @@ function BusinessPage() {
   };
 
   const downloadXls = () => {
-    downloadCSV(`${business.name}-${fmtMonth(monthDate)}.csv`, reportRows);
+    downloadCSV(`${business.name}-${safeLabel}.csv`, reportRows);
   };
 
   const generateInsight = async () => {
@@ -126,7 +135,7 @@ function BusinessPage() {
       const res = await insightFn({
         data: {
           businessName: business.name,
-          monthLabel: fmtMonth(monthDate),
+          monthLabel: rangeLabel,
           income: totals.income,
           expense: totals.expense,
           topExpenses: byCategory.filter((c) => c.type === "expense").slice(0, 8).map((c) => ({ name: c.name, total: c.total })),
@@ -140,9 +149,6 @@ function BusinessPage() {
     }
   };
 
-  const years = [today.getFullYear() - 2, today.getFullYear() - 1, today.getFullYear()];
-  const months = Array.from({ length: 12 }, (_, i) => i);
-
   return (
     <div className="p-8 space-y-6">
       <div className="flex items-end justify-between flex-wrap gap-3">
@@ -151,26 +157,11 @@ function BusinessPage() {
             <span className="h-4 w-4 rounded-full" style={{ backgroundColor: business.color }} />
             <h1 className="text-3xl font-semibold tracking-tight">{business.name}</h1>
           </div>
-          <p className="text-muted-foreground mt-1">{fmtMonth(monthDate)}</p>
+          <p className="text-muted-foreground mt-1">{rangeLabel}</p>
         </div>
 
-        <div className="flex gap-2 flex-wrap">
-          <Select value={String(month)} onValueChange={(v) => setMonth(Number(v))}>
-            <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {months.map((m) => (
-                <SelectItem key={m} value={String(m)}>
-                  {new Date(2000, m, 1).toLocaleString("en-US", { month: "long" })}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
-            <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {years.map((y) => (<SelectItem key={y} value={String(y)}>{y}</SelectItem>))}
-            </SelectContent>
-          </Select>
+        <div className="flex gap-2 flex-wrap items-center">
+          <DateRangePicker value={range} onChange={setRange} />
           <Button variant="outline" onClick={downloadPdf} className="gap-2"><FileDown className="h-4 w-4" />PDF</Button>
           <Button variant="outline" onClick={downloadXls} className="gap-2"><FileSpreadsheet className="h-4 w-4" />CSV</Button>
           <Button onClick={() => setOpen(true)} className="gap-2"><Plus className="h-4 w-4" />Add</Button>

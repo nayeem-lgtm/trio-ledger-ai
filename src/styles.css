@@ -47,14 +47,59 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/* Navy Trust — institutional finance palette */
+/* ===== Light theme (default) — Paper & Ink with Navy Trust accent ===== */
 :root {
   --radius: 0.5rem;
   --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Sora", "Manrope", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
-  /* Navy Trust tokens: #0f1b3d / #1e3a5f / #3b6fa0 / #e8edf3 */
+  --background: oklch(0.985 0.005 250);
+  --foreground: oklch(0.2 0.03 260);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.2 0.03 260);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.2 0.03 260);
+  --primary: oklch(0.45 0.13 250);
+  --primary-foreground: oklch(0.99 0 0);
+  --primary-glow: oklch(0.6 0.15 245);
+  --secondary: oklch(0.95 0.012 250);
+  --secondary-foreground: oklch(0.25 0.04 260);
+  --muted: oklch(0.96 0.008 250);
+  --muted-foreground: oklch(0.5 0.025 260);
+  --accent: oklch(0.94 0.02 250);
+  --accent-foreground: oklch(0.25 0.04 260);
+  --destructive: oklch(0.58 0.21 27);
+  --destructive-foreground: oklch(0.99 0 0);
+  --success: oklch(0.58 0.14 165);
+  --success-foreground: oklch(0.99 0 0);
+  --warning: oklch(0.72 0.16 75);
+  --warning-foreground: oklch(0.2 0.03 260);
+  --border: oklch(0.9 0.012 250);
+  --input: oklch(0.92 0.012 250);
+  --ring: oklch(0.45 0.13 250);
+  --chart-1: oklch(0.45 0.13 250);
+  --chart-2: oklch(0.65 0.14 220);
+  --chart-3: oklch(0.72 0.16 75);
+  --chart-4: oklch(0.58 0.21 27);
+  --chart-5: oklch(0.58 0.14 165);
+  --sidebar: oklch(1 0 0);
+  --sidebar-foreground: oklch(0.28 0.03 260);
+  --sidebar-primary: oklch(0.45 0.13 250);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.95 0.012 250);
+  --sidebar-accent-foreground: oklch(0.25 0.04 260);
+  --sidebar-border: oklch(0.9 0.012 250);
+  --sidebar-ring: oklch(0.45 0.13 250);
+
+  --shadow-soft: 0 1px 2px 0 oklch(0.2 0.03 260 / 0.05), 0 1px 3px 0 oklch(0.2 0.03 260 / 0.06);
+  --shadow-elevated: 0 10px 30px -12px oklch(0.2 0.03 260 / 0.18), 0 0 0 1px oklch(0.2 0.03 260 / 0.04);
+  --gradient-surface: linear-gradient(180deg, var(--card) 0%, color-mix(in oklab, var(--card) 85%, var(--background)) 100%);
+  --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--primary-glow) 100%);
+}
+
+/* ===== Dark theme — Navy Trust ===== */
+.dark {
   --background: oklch(0.19 0.045 265);
   --foreground: oklch(0.95 0.008 250);
   --card: oklch(0.235 0.05 265);
@@ -95,13 +140,6 @@
 
   --shadow-soft: 0 1px 2px 0 oklch(0 0 0 / 0.25), 0 1px 3px 0 oklch(0 0 0 / 0.2);
   --shadow-elevated: 0 10px 30px -12px oklch(0 0 0 / 0.5), 0 0 0 1px oklch(1 0 0 / 0.04);
-  --gradient-surface: linear-gradient(180deg, color-mix(in oklab, var(--card) 100%, transparent) 0%, color-mix(in oklab, var(--card) 80%, var(--background)) 100%);
-  --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--primary-glow) 100%);
-}
-
-.dark {
-  --background: oklch(0.19 0.045 265);
-  --foreground: oklch(0.95 0.008 250);
 }
 
 @theme inline {
@@ -129,22 +167,8 @@
   .font-mono, .tabular-nums { font-variant-numeric: tabular-nums; }
 }
 
-@utility gradient-card {
-  background-image: var(--gradient-surface);
-}
-
-@utility gradient-primary {
-  background-image: var(--gradient-primary);
-}
-
-@utility shadow-soft {
-  box-shadow: var(--shadow-soft);
-}
-
-@utility shadow-elevated {
-  box-shadow: var(--shadow-elevated);
-}
-
-@utility text-balance {
-  text-wrap: balance;
-}
+@utility gradient-card { background-image: var(--gradient-surface); }
+@utility gradient-primary { background-image: var(--gradient-primary); }
+@utility shadow-soft { box-shadow: var(--shadow-soft); }
+@utility shadow-elevated { box-shadow: var(--shadow-elevated); }
+@utility text-balance { text-wrap: balance; }

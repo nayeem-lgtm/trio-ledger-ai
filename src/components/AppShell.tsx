@@ -12,12 +12,16 @@ import {
   Briefcase,
   PlusCircle,
   Settings,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { BusinessDialog } from "@/components/BusinessDialog";
 import { useQueryClient } from "@tanstack/react-query";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { useServerFn } from "@tanstack/react-start";
+import { acceptMyInvites } from "@/lib/team.functions";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { data: businesses = [] } = useQuery(businessesQuery);
@@ -25,6 +29,17 @@ export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [openBiz, setOpenBiz] = useState(false);
+  const acceptFn = useServerFn(acceptMyInvites);
+
+  // Auto-accept any pending invites the user received before signing up
+  // (or while they were already signed in).
+  useEffect(() => {
+    acceptFn({})
+      .then((r) => {
+        if (r?.accepted > 0) qc.invalidateQueries();
+      })
+      .catch(() => {});
+  }, [acceptFn, qc]);
 
   const signOut = async () => {
     await qc.cancelQueries();
@@ -38,6 +53,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     { to: "/transactions", label: "Transactions", icon: ListPlus },
     { to: "/categories", label: "Categories", icon: Tags },
     { to: "/ai", label: "AI Assistant", icon: Sparkles },
+    { to: "/members", label: "Team", icon: Users },
     { to: "/settings", label: "Settings", icon: Settings },
   ];
 
@@ -48,12 +64,13 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="h-9 w-9 rounded-md gradient-primary grid place-items-center shadow-soft">
             <Layers className="h-4 w-4 text-primary-foreground" />
           </div>
-          <div className="leading-tight">
+          <div className="leading-tight flex-1">
             <div className="font-display font-semibold tracking-tight text-[15px]">Ledger</div>
             <div className="text-[10px] uppercase tracking-[0.18em] text-sidebar-foreground/50">
               Finance OS
             </div>
           </div>
+          <ThemeToggle compact />
         </div>
 
         <div className="px-5 mt-5 mb-2 text-[10px] uppercase tracking-[0.18em] text-sidebar-foreground/40">

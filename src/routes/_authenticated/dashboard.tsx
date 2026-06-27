@@ -4,9 +4,18 @@ import { businessesQuery, transactionsQuery } from "@/lib/queries";
 import { useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { fmtMoney, fmtMonth, monthRange } from "@/lib/format";
+import {
+  fmtMoney,
+  fmtRange,
+  buildPreset,
+  rangeToIso,
+  previousRange,
+  isoDay,
+  type DateRange,
+} from "@/lib/format";
 import { TrendingUp, TrendingDown, Wallet, Plus, ArrowUpRight, Activity } from "lucide-react";
 import { TransactionDialog } from "@/components/TransactionDialog";
+import { DateRangePicker } from "@/components/DateRangePicker";
 import { cn } from "@/lib/utils";
 import {
   ResponsiveContainer,
@@ -27,9 +36,11 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 
 function Overview() {
   const [open, setOpen] = useState(false);
-  const [now] = useState(() => new Date());
-  const { start, end } = monthRange(now.getFullYear(), now.getMonth());
-  const prev = monthRange(now.getFullYear(), now.getMonth() - 1);
+  const [range, setRange] = useState<DateRange>(() => buildPreset("this_month"));
+
+  const { start, end } = rangeToIso(range);
+  const prevRange = previousRange(range);
+  const prevIso = rangeToIso(prevRange);
 
   const { data: businesses = [] } = useQuery(businessesQuery);
   const { data: txns = [] } = useQuery(transactionsQuery());
@@ -39,8 +50,8 @@ function Overview() {
     [txns, start, end],
   );
   const inPrev = useMemo(
-    () => txns.filter((t) => t.transaction_date >= prev.start && t.transaction_date < prev.end),
-    [txns, prev.start, prev.end],
+    () => txns.filter((t) => t.transaction_date >= prevIso.start && t.transaction_date < prevIso.end),
+    [txns, prevIso.start, prevIso.end],
   );
 
   const sum = (rows: any[], type: string) =>
@@ -73,10 +84,12 @@ function Overview() {
 
   const trend = useMemo(() => {
     const out: { month: string; income: number; expense: number; net: number }[] = [];
+    const anchor = range.to;
     for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const r = monthRange(d.getFullYear(), d.getMonth());
-      const rows = txns.filter((t) => t.transaction_date >= r.start && t.transaction_date < r.end);
+      const d = new Date(anchor.getFullYear(), anchor.getMonth() - i, 1);
+      const monthStart = isoDay(d);
+      const monthEnd = isoDay(new Date(d.getFullYear(), d.getMonth() + 1, 1));
+      const rows = txns.filter((t) => t.transaction_date >= monthStart && t.transaction_date < monthEnd);
       const inc = sum(rows, "income");
       const exp = sum(rows, "expense");
       out.push({
@@ -87,7 +100,7 @@ function Overview() {
       });
     }
     return out;
-  }, [txns, now]);
+  }, [txns, range.to]);
 
   const recent = useMemo(() => txns.slice(0, 6), [txns]);
 
@@ -100,15 +113,18 @@ function Overview() {
             Consolidated Overview
           </div>
           <h1 className="font-display text-[34px] leading-none font-semibold tracking-tight">
-            {fmtMonth(now)}
+            {fmtRange(range)}
           </h1>
           <p className="text-sm text-muted-foreground mt-2">
             {businesses.length} entities · {inMonth.length} transactions this period
           </p>
         </div>
-        <Button onClick={() => setOpen(true)} className="gap-2 shadow-soft">
-          <Plus className="h-4 w-4" /> Record entry
-        </Button>
+        <div className="flex gap-2 items-center flex-wrap">
+          <DateRangePicker value={range} onChange={setRange} />
+          <Button onClick={() => setOpen(true)} className="gap-2 shadow-soft">
+            <Plus className="h-4 w-4" /> Record entry
+          </Button>
+        </div>
       </header>
 
       {/* Bento grid */}
