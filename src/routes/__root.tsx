@@ -84,6 +84,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "AI-powered accounting for multiple businesses. Track revenue, expenses, and download monthly P&L reports.",
       },
+      { property: "og:title", content: "Cash Flow — Multi-Business Accounting" },
+      { name: "twitter:title", content: "Cash Flow — Multi-Business Accounting" },
+      { name: "description", content: "Business Books Keeper is an AI-powered accounting software for tracking multiple businesses and their financial data." },
+      { property: "og:description", content: "Business Books Keeper is an AI-powered accounting software for tracking multiple businesses and their financial data." },
+      { name: "twitter:description", content: "Business Books Keeper is an AI-powered accounting software for tracking multiple businesses and their financial data." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/8c77859e-ccee-497d-82ee-b4bb8a0df1f1/id-preview-c2eb35f4--b8c38cd5-9f09-4cc4-8ad9-93bb3b922e35.lovable.app-1782585854381.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/8c77859e-ccee-497d-82ee-b4bb8a0df1f1/id-preview-c2eb35f4--b8c38cd5-9f09-4cc4-8ad9-93bb3b922e35.lovable.app-1782585854381.png" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:type", content: "website" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
