@@ -303,7 +303,7 @@ function InvoiceEditor() {
     invoice_number: f.invoice_number,
     company_name: brand?.company_name ?? f.sender?.company ?? f.sender?.name ?? "",
     buyer_name: f.receiver?.name ?? "",
-    total: fmtMoney(totals.total, f.currency),
+    total: fmtMoney(totals.total),
     due_date: f.due_date ?? "",
   };
   const emailSubject = tpl(f.email_subject || brand?.default_email_subject || `Invoice ${f.invoice_number}`, emailVars);
