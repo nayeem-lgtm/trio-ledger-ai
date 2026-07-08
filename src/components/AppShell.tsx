@@ -16,6 +16,7 @@ import {
   Handshake,
   Wallet,
   FileText,
+  Palette,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -57,6 +58,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     { to: "/publishers", label: "Publishers", icon: Wallet },
     { to: "/buyers", label: "Buyers", icon: Handshake },
     { to: "/invoices", label: "Invoices", icon: FileText },
+    { to: "/brand", label: "Brand Kit", icon: Palette },
     { to: "/categories", label: "Categories", icon: Tags },
     { to: "/ai", label: "AI Assistant", icon: Sparkles },
     { to: "/members", label: "Team", icon: Users },
