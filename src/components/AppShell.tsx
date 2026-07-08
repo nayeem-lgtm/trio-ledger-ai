@@ -57,8 +57,6 @@ export function AppShell({ children }: { children: ReactNode }) {
     { to: "/transactions", label: "Transactions", icon: ListPlus },
     { to: "/publishers", label: "Publishers", icon: Wallet },
     { to: "/buyers", label: "Buyers", icon: Handshake },
-    { to: "/invoices", label: "Invoices", icon: FileText },
-    { to: "/brand", label: "Brand Kit", icon: Palette },
     { to: "/categories", label: "Categories", icon: Tags },
     { to: "/ai", label: "AI Assistant", icon: Sparkles },
     { to: "/members", label: "Team", icon: Users },
