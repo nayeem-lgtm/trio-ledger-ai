@@ -142,6 +142,9 @@ function PublishersPage() {
               </div>
               {selected && (
                 <div className="flex gap-2">
+                  <Link to="/publishers/$publisherId" params={{ publisherId: selected.id }}>
+                    <Button size="sm" variant="outline">Open detail</Button>
+                  </Link>
                   <Button size="sm" variant="ghost" onClick={() => { setEditing(selected); setOpenPub(true); }}><Pencil className="h-4 w-4" /></Button>
                   <Button size="sm" variant="ghost" onClick={() => onDelete(selected.id)}><Trash2 className="h-4 w-4" /></Button>
                   <Button size="sm" className="gap-2" onClick={() => setPayDialog({ open: true, publisher: selected })}>
