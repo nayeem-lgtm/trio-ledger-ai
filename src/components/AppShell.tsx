@@ -15,8 +15,7 @@ import {
   Users,
   Handshake,
   Wallet,
-  FileText,
-  Palette,
+
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
