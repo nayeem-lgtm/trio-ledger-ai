@@ -10,7 +10,7 @@ import { Plus, Trash2, Send, CircleDollarSign, Eye } from "lucide-react";
 import { listInvoices, deleteInvoice, markInvoicePaid } from "@/lib/invoices.functions";
 import { fmtMoney } from "@/lib/format";
 
-export const Route = createFileRoute("/_authenticated/invoices")({
+export const Route = createFileRoute("/_authenticated/invoices/")({
   component: InvoicesPage,
 });
 
