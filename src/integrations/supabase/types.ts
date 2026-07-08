@@ -14,6 +14,99 @@ export type Database = {
   }
   public: {
     Tables: {
+      brand_kits: {
+        Row: {
+          accent_color: string | null
+          body_font: string | null
+          brand_color: string | null
+          company_address: string | null
+          company_email: string | null
+          company_name: string | null
+          company_phone: string | null
+          company_tax_id: string | null
+          company_website: string | null
+          created_at: string
+          default_email_body: string | null
+          default_email_subject: string | null
+          default_notes: string | null
+          default_terms: string | null
+          footer_text: string | null
+          heading_font: string | null
+          id: string
+          is_default: boolean
+          logo_url: string | null
+          muted_color: string | null
+          name: string
+          page_size: string | null
+          signature_url: string | null
+          tagline: string | null
+          text_color: string | null
+          updated_at: string
+          user_id: string
+          watermark_text: string | null
+        }
+        Insert: {
+          accent_color?: string | null
+          body_font?: string | null
+          brand_color?: string | null
+          company_address?: string | null
+          company_email?: string | null
+          company_name?: string | null
+          company_phone?: string | null
+          company_tax_id?: string | null
+          company_website?: string | null
+          created_at?: string
+          default_email_body?: string | null
+          default_email_subject?: string | null
+          default_notes?: string | null
+          default_terms?: string | null
+          footer_text?: string | null
+          heading_font?: string | null
+          id?: string
+          is_default?: boolean
+          logo_url?: string | null
+          muted_color?: string | null
+          name?: string
+          page_size?: string | null
+          signature_url?: string | null
+          tagline?: string | null
+          text_color?: string | null
+          updated_at?: string
+          user_id: string
+          watermark_text?: string | null
+        }
+        Update: {
+          accent_color?: string | null
+          body_font?: string | null
+          brand_color?: string | null
+          company_address?: string | null
+          company_email?: string | null
+          company_name?: string | null
+          company_phone?: string | null
+          company_tax_id?: string | null
+          company_website?: string | null
+          created_at?: string
+          default_email_body?: string | null
+          default_email_subject?: string | null
+          default_notes?: string | null
+          default_terms?: string | null
+          footer_text?: string | null
+          heading_font?: string | null
+          id?: string
+          is_default?: boolean
+          logo_url?: string | null
+          muted_color?: string | null
+          name?: string
+          page_size?: string | null
+          signature_url?: string | null
+          tagline?: string | null
+          text_color?: string | null
+          updated_at?: string
+          user_id?: string
+          watermark_text?: string | null
+        }
+        Relationships: []
+      }
       businesses: {
         Row: {
           color: string
@@ -233,6 +326,8 @@ export type Database = {
           description: string
           id: string
           invoice_id: string
+          item_discount: number
+          item_tax_rate: number
           position: number
           quantity: number
           service_end: string | null
@@ -245,6 +340,8 @@ export type Database = {
           description: string
           id?: string
           invoice_id: string
+          item_discount?: number
+          item_tax_rate?: number
           position?: number
           quantity?: number
           service_end?: string | null
@@ -257,6 +354,8 @@ export type Database = {
           description?: string
           id?: string
           invoice_id?: string
+          item_discount?: number
+          item_tax_rate?: number
           position?: number
           quantity?: number
           service_end?: string | null
@@ -276,18 +375,27 @@ export type Database = {
       invoices: {
         Row: {
           bank_details: Json | null
+          bcc_emails: string[]
+          blocks: Json
+          brand_kit_id: string | null
           business_id: string | null
           buyer_id: string | null
+          cc_emails: string[]
           created_at: string
           currency: string
+          custom_fields: Json
           discount: number
           due_date: string | null
+          email_body: string | null
+          email_subject: string | null
           id: string
           invoice_number: string
           issue_date: string
           notes: string | null
           paid_at: string | null
           payment_link: string | null
+          po_number: string | null
+          project_code: string | null
           receiver: Json | null
           sender: Json | null
           sent_at: string | null
@@ -304,18 +412,27 @@ export type Database = {
         }
         Insert: {
           bank_details?: Json | null
+          bcc_emails?: string[]
+          blocks?: Json
+          brand_kit_id?: string | null
           business_id?: string | null
           buyer_id?: string | null
+          cc_emails?: string[]
           created_at?: string
           currency?: string
+          custom_fields?: Json
           discount?: number
           due_date?: string | null
+          email_body?: string | null
+          email_subject?: string | null
           id?: string
           invoice_number: string
           issue_date?: string
           notes?: string | null
           paid_at?: string | null
           payment_link?: string | null
+          po_number?: string | null
+          project_code?: string | null
           receiver?: Json | null
           sender?: Json | null
           sent_at?: string | null
@@ -332,18 +449,27 @@ export type Database = {
         }
         Update: {
           bank_details?: Json | null
+          bcc_emails?: string[]
+          blocks?: Json
+          brand_kit_id?: string | null
           business_id?: string | null
           buyer_id?: string | null
+          cc_emails?: string[]
           created_at?: string
           currency?: string
+          custom_fields?: Json
           discount?: number
           due_date?: string | null
+          email_body?: string | null
+          email_subject?: string | null
           id?: string
           invoice_number?: string
           issue_date?: string
           notes?: string | null
           paid_at?: string | null
           payment_link?: string | null
+          po_number?: string | null
+          project_code?: string | null
           receiver?: Json | null
           sender?: Json | null
           sent_at?: string | null
@@ -359,6 +485,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "invoices_brand_kit_id_fkey"
+            columns: ["brand_kit_id"]
+            isOneToOne: false
+            referencedRelation: "brand_kits"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "invoices_business_id_fkey"
             columns: ["business_id"]
