@@ -155,7 +155,7 @@ function BuyersPage() {
         </div>
 
         <BuyerDialog open={openBuyer} onOpenChange={setOpenBuyer} editing={editing} />
-        <ReceiptDialog open={recDialog.open} onOpenChange={(o) => setRecDialog({ ...recDialog, open: o })} buyer={recDialog.buyer} receipt={recDialog.receipt} />
+        <ReceiptDialog open={recDialog.open} onOpenChange={(o: boolean) => setRecDialog({ ...recDialog, open: o })} buyer={recDialog.buyer} receipt={recDialog.receipt} />
       </div>
     </AppShell>
   );
