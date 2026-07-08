@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
@@ -105,19 +105,30 @@ function PublishersPage() {
                   <div className="p-6 text-sm text-muted-foreground text-center">No publishers yet.</div>
                 )}
                 {publishers.map((p: any) => (
-                  <button
+                  <div
                     key={p.id}
-                    onClick={() => setSelectedId(p.id)}
-                    className={`w-full text-left p-4 hover:bg-muted/40 transition ${selected?.id === p.id ? "bg-muted/60" : ""}`}
+                    className={`w-full flex items-stretch hover:bg-muted/40 transition ${selected?.id === p.id ? "bg-muted/60" : ""}`}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="min-w-0">
-                        <div className="font-medium truncate">{p.name}</div>
-                        <div className="text-xs text-muted-foreground truncate">{p.email ?? p.company ?? "—"}</div>
+                    <button
+                      onClick={() => setSelectedId(p.id)}
+                      className="flex-1 text-left p-4 min-w-0"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="min-w-0">
+                          <div className="font-medium truncate">{p.name}</div>
+                          <div className="text-xs text-muted-foreground truncate">{p.email ?? p.company ?? "—"}</div>
+                        </div>
+                        <Badge variant="outline" className="capitalize shrink-0">{p.payment_terms.replace("_", " ")}</Badge>
                       </div>
-                      <Badge variant="outline" className="capitalize">{p.payment_terms.replace("_", " ")}</Badge>
-                    </div>
-                  </button>
+                    </button>
+                    <Link
+                      to="/publishers/$publisherId"
+                      params={{ publisherId: p.id }}
+                      className="px-3 grid place-items-center text-xs text-muted-foreground hover:text-foreground border-l border-border"
+                    >
+                      Open →
+                    </Link>
+                  </div>
                 ))}
               </div>
             </CardContent>
