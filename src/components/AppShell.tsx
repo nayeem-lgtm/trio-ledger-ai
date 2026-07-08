@@ -13,6 +13,9 @@ import {
   PlusCircle,
   Settings,
   Users,
+  Handshake,
+  Wallet,
+  FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -51,6 +54,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   const nav = [
     { to: "/dashboard", label: "Overview", icon: LayoutDashboard },
     { to: "/transactions", label: "Transactions", icon: ListPlus },
+    { to: "/publishers", label: "Publishers", icon: Wallet },
+    { to: "/buyers", label: "Buyers", icon: Handshake },
+    { to: "/invoices", label: "Invoices", icon: FileText },
     { to: "/categories", label: "Categories", icon: Tags },
     { to: "/ai", label: "AI Assistant", icon: Sparkles },
     { to: "/members", label: "Team", icon: Users },

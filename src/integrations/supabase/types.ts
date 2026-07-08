@@ -47,6 +47,147 @@ export type Database = {
         }
         Relationships: []
       }
+      buyer_receipts: {
+        Row: {
+          amount: number
+          buyer_id: string
+          created_at: string
+          currency: string
+          expected_date: string | null
+          id: string
+          notes: string | null
+          period_end: string | null
+          period_start: string | null
+          received_date: string | null
+          reference: string | null
+          status: Database["public"]["Enums"]["payment_status"]
+          transaction_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          buyer_id: string
+          created_at?: string
+          currency?: string
+          expected_date?: string | null
+          id?: string
+          notes?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          received_date?: string | null
+          reference?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          transaction_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          buyer_id?: string
+          created_at?: string
+          currency?: string
+          expected_date?: string | null
+          id?: string
+          notes?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          received_date?: string | null
+          reference?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          transaction_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "buyer_receipts_buyer_id_fkey"
+            columns: ["buyer_id"]
+            isOneToOne: false
+            referencedRelation: "buyers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "buyer_receipts_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      buyers: {
+        Row: {
+          address: string | null
+          company: string | null
+          created_at: string
+          currency: string
+          custom_days: number | null
+          default_business_id: string | null
+          default_category_id: string | null
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          payment_terms: Database["public"]["Enums"]["payment_term"]
+          phone: string | null
+          tax_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          company?: string | null
+          created_at?: string
+          currency?: string
+          custom_days?: number | null
+          default_business_id?: string | null
+          default_category_id?: string | null
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          payment_terms?: Database["public"]["Enums"]["payment_term"]
+          phone?: string | null
+          tax_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          company?: string | null
+          created_at?: string
+          currency?: string
+          custom_days?: number | null
+          default_business_id?: string | null
+          default_category_id?: string | null
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          payment_terms?: Database["public"]["Enums"]["payment_term"]
+          phone?: string | null
+          tax_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "buyers_default_business_id_fkey"
+            columns: ["default_business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "buyers_default_category_id_fkey"
+            columns: ["default_category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           business_id: string | null
@@ -85,6 +226,162 @@ export type Database = {
           },
         ]
       }
+      invoice_items: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string
+          id: string
+          invoice_id: string
+          position: number
+          quantity: number
+          service_end: string | null
+          service_start: string | null
+          unit_price: number
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          description: string
+          id?: string
+          invoice_id: string
+          position?: number
+          quantity?: number
+          service_end?: string | null
+          service_start?: string | null
+          unit_price?: number
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string
+          id?: string
+          invoice_id?: string
+          position?: number
+          quantity?: number
+          service_end?: string | null
+          service_start?: string | null
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          bank_details: Json | null
+          business_id: string | null
+          buyer_id: string | null
+          created_at: string
+          currency: string
+          discount: number
+          due_date: string | null
+          id: string
+          invoice_number: string
+          issue_date: string
+          notes: string | null
+          paid_at: string | null
+          payment_link: string | null
+          receiver: Json | null
+          sender: Json | null
+          sent_at: string | null
+          status: Database["public"]["Enums"]["invoice_status"]
+          subtotal: number
+          tax_amount: number
+          tax_rate: number
+          template: string
+          terms: string | null
+          total: number
+          transaction_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bank_details?: Json | null
+          business_id?: string | null
+          buyer_id?: string | null
+          created_at?: string
+          currency?: string
+          discount?: number
+          due_date?: string | null
+          id?: string
+          invoice_number: string
+          issue_date?: string
+          notes?: string | null
+          paid_at?: string | null
+          payment_link?: string | null
+          receiver?: Json | null
+          sender?: Json | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          subtotal?: number
+          tax_amount?: number
+          tax_rate?: number
+          template?: string
+          terms?: string | null
+          total?: number
+          transaction_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bank_details?: Json | null
+          business_id?: string | null
+          buyer_id?: string | null
+          created_at?: string
+          currency?: string
+          discount?: number
+          due_date?: string | null
+          id?: string
+          invoice_number?: string
+          issue_date?: string
+          notes?: string | null
+          paid_at?: string | null
+          payment_link?: string | null
+          receiver?: Json | null
+          sender?: Json | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          subtotal?: number
+          tax_amount?: number
+          tax_rate?: number
+          template?: string
+          terms?: string | null
+          total?: number
+          transaction_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_buyer_id_fkey"
+            columns: ["buyer_id"]
+            isOneToOne: false
+            referencedRelation: "buyers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -109,6 +406,189 @@ export type Database = {
           full_name?: string | null
           id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      publisher_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          due_date: string | null
+          id: string
+          notes: string | null
+          payment_date: string | null
+          period_end: string | null
+          period_start: string | null
+          publisher_id: string
+          reference: string | null
+          status: Database["public"]["Enums"]["payment_status"]
+          transaction_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          payment_date?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          publisher_id: string
+          reference?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          transaction_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          payment_date?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          publisher_id?: string
+          reference?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          transaction_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "publisher_payments_publisher_id_fkey"
+            columns: ["publisher_id"]
+            isOneToOne: false
+            referencedRelation: "publishers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "publisher_payments_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      publishers: {
+        Row: {
+          bank_details: Json | null
+          company: string | null
+          created_at: string
+          currency: string
+          custom_days: number | null
+          default_amount: number | null
+          default_business_id: string | null
+          default_category_id: string | null
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          payment_terms: Database["public"]["Enums"]["payment_term"]
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bank_details?: Json | null
+          company?: string | null
+          created_at?: string
+          currency?: string
+          custom_days?: number | null
+          default_amount?: number | null
+          default_business_id?: string | null
+          default_category_id?: string | null
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          payment_terms?: Database["public"]["Enums"]["payment_term"]
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bank_details?: Json | null
+          company?: string | null
+          created_at?: string
+          currency?: string
+          custom_days?: number | null
+          default_amount?: number | null
+          default_business_id?: string | null
+          default_category_id?: string | null
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          payment_terms?: Database["public"]["Enums"]["payment_term"]
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "publishers_default_business_id_fkey"
+            columns: ["default_business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "publishers_default_category_id_fkey"
+            columns: ["default_category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      smtp_settings: {
+        Row: {
+          created_at: string
+          from_email: string
+          from_name: string | null
+          host: string
+          password: string
+          port: number
+          reply_to: string | null
+          secure: boolean
+          updated_at: string
+          user_id: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          from_email: string
+          from_name?: string | null
+          host: string
+          password: string
+          port?: number
+          reply_to?: string | null
+          secure?: boolean
+          updated_at?: string
+          user_id: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          from_email?: string
+          from_name?: string | null
+          host?: string
+          password?: string
+          port?: number
+          reply_to?: string | null
+          secure?: boolean
+          updated_at?: string
+          user_id?: string
+          username?: string
         }
         Relationships: []
       }
@@ -273,6 +753,16 @@ export type Database = {
       }
     }
     Enums: {
+      invoice_status: "draft" | "sent" | "paid" | "overdue" | "cancelled"
+      payment_status: "pending" | "paid" | "overdue" | "cancelled"
+      payment_term:
+        | "daily"
+        | "weekly"
+        | "biweekly"
+        | "monthly"
+        | "quarterly"
+        | "custom"
+        | "on_receipt"
       team_role: "admin" | "editor" | "viewer"
       txn_type: "income" | "expense"
     }
@@ -402,6 +892,17 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      invoice_status: ["draft", "sent", "paid", "overdue", "cancelled"],
+      payment_status: ["pending", "paid", "overdue", "cancelled"],
+      payment_term: [
+        "daily",
+        "weekly",
+        "biweekly",
+        "monthly",
+        "quarterly",
+        "custom",
+        "on_receipt",
+      ],
       team_role: ["admin", "editor", "viewer"],
       txn_type: ["income", "expense"],
     },
