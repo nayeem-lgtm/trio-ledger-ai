@@ -21,6 +21,7 @@ import { Route as AuthenticatedCategoriesRouteImport } from './routes/_authentic
 import { Route as AuthenticatedBuyersRouteImport } from './routes/_authenticated/buyers'
 import { Route as AuthenticatedAiRouteImport } from './routes/_authenticated/ai'
 import { Route as AuthenticatedInvoicesIndexRouteImport } from './routes/_authenticated/invoices.index'
+import { Route as AuthenticatedPublishersPublisherIdRouteImport } from './routes/_authenticated/publishers.$publisherId'
 import { Route as AuthenticatedInvoicesInvoiceIdRouteImport } from './routes/_authenticated/invoices.$invoiceId'
 import { Route as AuthenticatedBusinessBusinessIdRouteImport } from './routes/_authenticated/business.$businessId'
 
@@ -85,6 +86,12 @@ const AuthenticatedInvoicesIndexRoute =
     path: '/invoices/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedPublishersPublisherIdRoute =
+  AuthenticatedPublishersPublisherIdRouteImport.update({
+    id: '/$publisherId',
+    path: '/$publisherId',
+    getParentRoute: () => AuthenticatedPublishersRoute,
+  } as any)
 const AuthenticatedInvoicesInvoiceIdRoute =
   AuthenticatedInvoicesInvoiceIdRouteImport.update({
     id: '/invoices/$invoiceId',
@@ -106,11 +113,12 @@ export interface FileRoutesByFullPath {
   '/categories': typeof AuthenticatedCategoriesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/members': typeof AuthenticatedMembersRoute
-  '/publishers': typeof AuthenticatedPublishersRoute
+  '/publishers': typeof AuthenticatedPublishersRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRoute
   '/transactions': typeof AuthenticatedTransactionsRoute
   '/business/$businessId': typeof AuthenticatedBusinessBusinessIdRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
+  '/publishers/$publisherId': typeof AuthenticatedPublishersPublisherIdRoute
   '/invoices/': typeof AuthenticatedInvoicesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -121,11 +129,12 @@ export interface FileRoutesByTo {
   '/categories': typeof AuthenticatedCategoriesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/members': typeof AuthenticatedMembersRoute
-  '/publishers': typeof AuthenticatedPublishersRoute
+  '/publishers': typeof AuthenticatedPublishersRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRoute
   '/transactions': typeof AuthenticatedTransactionsRoute
   '/business/$businessId': typeof AuthenticatedBusinessBusinessIdRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
+  '/publishers/$publisherId': typeof AuthenticatedPublishersPublisherIdRoute
   '/invoices': typeof AuthenticatedInvoicesIndexRoute
 }
 export interface FileRoutesById {
@@ -138,11 +147,12 @@ export interface FileRoutesById {
   '/_authenticated/categories': typeof AuthenticatedCategoriesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/members': typeof AuthenticatedMembersRoute
-  '/_authenticated/publishers': typeof AuthenticatedPublishersRoute
+  '/_authenticated/publishers': typeof AuthenticatedPublishersRouteWithChildren
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/transactions': typeof AuthenticatedTransactionsRoute
   '/_authenticated/business/$businessId': typeof AuthenticatedBusinessBusinessIdRoute
   '/_authenticated/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
+  '/_authenticated/publishers/$publisherId': typeof AuthenticatedPublishersPublisherIdRoute
   '/_authenticated/invoices/': typeof AuthenticatedInvoicesIndexRoute
 }
 export interface FileRouteTypes {
@@ -160,6 +170,7 @@ export interface FileRouteTypes {
     | '/transactions'
     | '/business/$businessId'
     | '/invoices/$invoiceId'
+    | '/publishers/$publisherId'
     | '/invoices/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -175,6 +186,7 @@ export interface FileRouteTypes {
     | '/transactions'
     | '/business/$businessId'
     | '/invoices/$invoiceId'
+    | '/publishers/$publisherId'
     | '/invoices'
   id:
     | '__root__'
@@ -191,6 +203,7 @@ export interface FileRouteTypes {
     | '/_authenticated/transactions'
     | '/_authenticated/business/$businessId'
     | '/_authenticated/invoices/$invoiceId'
+    | '/_authenticated/publishers/$publisherId'
     | '/_authenticated/invoices/'
   fileRoutesById: FileRoutesById
 }
@@ -286,6 +299,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInvoicesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/publishers/$publisherId': {
+      id: '/_authenticated/publishers/$publisherId'
+      path: '/$publisherId'
+      fullPath: '/publishers/$publisherId'
+      preLoaderRoute: typeof AuthenticatedPublishersPublisherIdRouteImport
+      parentRoute: typeof AuthenticatedPublishersRoute
+    }
     '/_authenticated/invoices/$invoiceId': {
       id: '/_authenticated/invoices/$invoiceId'
       path: '/invoices/$invoiceId'
@@ -303,13 +323,28 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedPublishersRouteChildren {
+  AuthenticatedPublishersPublisherIdRoute: typeof AuthenticatedPublishersPublisherIdRoute
+}
+
+const AuthenticatedPublishersRouteChildren: AuthenticatedPublishersRouteChildren =
+  {
+    AuthenticatedPublishersPublisherIdRoute:
+      AuthenticatedPublishersPublisherIdRoute,
+  }
+
+const AuthenticatedPublishersRouteWithChildren =
+  AuthenticatedPublishersRoute._addFileChildren(
+    AuthenticatedPublishersRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAiRoute: typeof AuthenticatedAiRoute
   AuthenticatedBuyersRoute: typeof AuthenticatedBuyersRoute
   AuthenticatedCategoriesRoute: typeof AuthenticatedCategoriesRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedMembersRoute: typeof AuthenticatedMembersRoute
-  AuthenticatedPublishersRoute: typeof AuthenticatedPublishersRoute
+  AuthenticatedPublishersRoute: typeof AuthenticatedPublishersRouteWithChildren
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedTransactionsRoute: typeof AuthenticatedTransactionsRoute
   AuthenticatedBusinessBusinessIdRoute: typeof AuthenticatedBusinessBusinessIdRoute
@@ -323,7 +358,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCategoriesRoute: AuthenticatedCategoriesRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedMembersRoute: AuthenticatedMembersRoute,
-  AuthenticatedPublishersRoute: AuthenticatedPublishersRoute,
+  AuthenticatedPublishersRoute: AuthenticatedPublishersRouteWithChildren,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedTransactionsRoute: AuthenticatedTransactionsRoute,
   AuthenticatedBusinessBusinessIdRoute: AuthenticatedBusinessBusinessIdRoute,
