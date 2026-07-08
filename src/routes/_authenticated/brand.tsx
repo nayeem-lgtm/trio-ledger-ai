@@ -251,7 +251,7 @@ function BrandPage() {
   );
 }
 
-function TF({ label, v, on, placeholder }: any) {
+function TF({ label, v, on, placeholder }: { label: string; v: string | null | undefined; on: (v: string) => void; placeholder?: string }) {
   return (
     <div className="space-y-1.5">
       <Label className="text-xs">{label}</Label>
