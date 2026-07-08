@@ -239,7 +239,6 @@ function PublisherDialog({ open, onOpenChange, editing }: { open: boolean; onOpe
     name: "", email: "", phone: "", company: "", payment_terms: "monthly", custom_days: null,
     default_amount: null, currency: "USD", notes: "",
     default_business_id: null, default_category_id: null,
-    bank_details: { bank_name: "", account_number: "", routing: "" },
   });
 
   useMemoInit(open, editing, setF);
@@ -260,7 +259,7 @@ function PublisherDialog({ open, onOpenChange, editing }: { open: boolean; onOpe
         notes: f.notes || null,
         default_business_id: f.default_business_id || null,
         default_category_id: f.default_category_id || null,
-        bank_details: f.bank_details,
+        bank_details: {},
       }});
       toast.success(editing ? "Publisher updated" : "Publisher added");
       qc.invalidateQueries({ queryKey: ["publishers"] });
@@ -306,9 +305,6 @@ function PublisherDialog({ open, onOpenChange, editing }: { open: boolean; onOpe
               </SelectContent>
             </Select>
           </Field>
-          <Field label="Bank name" className="col-span-2"><Input value={f.bank_details?.bank_name ?? ""} onChange={(e) => setF({ ...f, bank_details: { ...f.bank_details, bank_name: e.target.value } })} /></Field>
-          <Field label="Account #"><Input value={f.bank_details?.account_number ?? ""} onChange={(e) => setF({ ...f, bank_details: { ...f.bank_details, account_number: e.target.value } })} /></Field>
-          <Field label="Routing/IBAN"><Input value={f.bank_details?.routing ?? ""} onChange={(e) => setF({ ...f, bank_details: { ...f.bank_details, routing: e.target.value } })} /></Field>
           <Field label="Notes" className="col-span-2"><Textarea value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} /></Field>
         </div>
         <DialogFooter>
