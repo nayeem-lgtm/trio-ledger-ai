@@ -22,13 +22,15 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Sparkles, KeyRound, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { Sparkles, KeyRound, CheckCircle2, XCircle, Loader2, Mail } from "lucide-react";
 import {
   getAISettings,
   saveAISettings,
   clearAIKey,
   testAIConnection,
 } from "@/lib/ai-settings.functions";
+import { getSmtpSettings, saveSmtpSettings, deleteSmtpSettings, testSmtp } from "@/lib/smtp.functions";
+import { Switch } from "@/components/ui/switch";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
