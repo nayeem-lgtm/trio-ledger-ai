@@ -50,22 +50,38 @@ type SheetCfg = {
   table: string;
   cols: Col[];
   dateKey: string | null;
+  /** Short human blurb describing what this sheet is used for */
+  description: string;
+  /** KPI generators for the mini section report shown above the grid */
+  report?: (rows: any[], isCEO: boolean) => { label: string; value: string; tone?: "primary" | "destructive" | "muted" }[];
 };
 
 const SHEETS: Record<string, SheetCfg> = {
   sales: {
-    label: "Sales Log",
+    label: "Sales & Policies",
     table: "insurance_sales",
+    description: "Every issued policy — customer, carrier, payment terms, QA status and commission eligibility.",
     cols: [
-      { key: "sale_date", label: "Date", type: "date", width: 130 },
-      { key: "week_start", label: "Week Start", type: "date", width: 130 },
+      { key: "sale_date", label: "Sale Date", type: "date", width: 120 },
+      { key: "week_start", label: "Week Start", type: "date", width: 120 },
       { key: "agent", label: "Agent", type: "text" },
       { key: "source", label: "Source", type: "text" },
-      { key: "ringba_target", label: "Ringba Target", type: "text" },
+      { key: "customer_name", label: "Customer", type: "text", width: 150 },
+      { key: "phone_number", label: "Phone", type: "text", width: 130 },
+      { key: "state", label: "State", type: "text", width: 70 },
       { key: "product", label: "Product", type: "text" },
       { key: "carrier", label: "Carrier", type: "text" },
+      { key: "policy_number", label: "Policy #", type: "text", width: 120 },
+      { key: "policy_start_date", label: "Policy Start", type: "date", width: 120 },
+      { key: "payment_method", label: "Payment Method", type: "text", width: 160 },
+      { key: "payment_risk", label: "Payment Risk", type: "text", width: 130 },
+      { key: "premium_draft_date", label: "Draft Date", type: "date", width: 120 },
+      { key: "payment_status", label: "Payment Status", type: "text", width: 150 },
       { key: "policy_amount", label: "Policy Amount", type: "number" },
       { key: "monthly_premium", label: "Monthly Premium", type: "number" },
+      { key: "carrier_revenue_received_amount", label: "Carrier Rev. Recv.", type: "number", width: 150 },
+      { key: "carrier_revenue_received", label: "Rev. Recv.?", type: "bool" },
+      { key: "revenue_received_date", label: "Rev. Recv. Date", type: "date", width: 130 },
       {
         key: "__total_commission",
         label: "Total Commission",
@@ -82,116 +98,259 @@ const SHEETS: Record<string, SheetCfg> = {
         ceoOnly: true,
         computed: (r) => num(r.monthly_premium) * 12 * 0.75,
       },
-      { key: "sale_status", label: "Status", type: "text" },
+      { key: "sale_status", label: "Sale Status", type: "text" },
       { key: "count_sale", label: "Count?", type: "bool" },
+      { key: "commission_eligible", label: "Comm. Eligible?", type: "bool" },
       { key: "personal_lead_incentive", label: "Personal Lead $", type: "number" },
-      { key: "policy_start_date", label: "Policy Start", type: "date", width: 130 },
+      { key: "ringba_target", label: "Ringba Target", type: "text", width: 160 },
+      { key: "publisher", label: "Publisher", type: "text" },
+      { key: "qa_status", label: "QA Status", type: "text" },
+      { key: "callback_converted", label: "Callback Conv.?", type: "bool" },
       { key: "notes", label: "Notes", type: "text", width: 220 },
     ],
     dateKey: "sale_date",
+    report: (rows, isCEO) => {
+      const counted = rows.filter((r) => r.count_sale !== false);
+      const premium = counted.reduce((s, r) => s + num(r.monthly_premium), 0);
+      const policy = counted.reduce((s, r) => s + num(r.policy_amount), 0);
+      const revRecv = rows.reduce((s, r) => s + num(r.carrier_revenue_received_amount), 0);
+      const out: any[] = [
+        { label: "Sales counted", value: counted.length.toString() },
+        { label: "Policy Amount", value: fmtMoney(policy) },
+        { label: "Monthly Premium", value: fmtMoney(premium), tone: "primary" },
+        { label: "Carrier Revenue Received", value: fmtMoney(revRecv) },
+      ];
+      if (isCEO) {
+        out.push({ label: "Total Commission", value: fmtMoney(premium * 12), tone: "primary" });
+        out.push({ label: "Receivable (75%)", value: fmtMoney(premium * 12 * 0.75), tone: "primary" });
+      }
+      return out;
+    },
   },
-  calltools: {
-    label: "CallTools",
-    table: "insurance_calltools",
-    cols: [
-      { key: "entry_date", label: "Date", type: "date", width: 130 },
-      { key: "week_start", label: "Week Start", type: "date", width: 130 },
-      { key: "agent", label: "Agent", type: "text" },
-      { key: "total_dispositions", label: "Total Disp.", type: "number" },
-      { key: "customer_hang_up", label: "Hang Up", type: "number" },
-      { key: "call_back_scheduled", label: "Callback Sched.", type: "number" },
-      { key: "busy_call_back_later", label: "Busy/Later", type: "number" },
-      { key: "goal_disposition", label: "Goal Disp.", type: "number" },
-      { key: "not_interested", label: "Not Interested", type: "number" },
-      { key: "no_contact", label: "No Contact", type: "number" },
-      { key: "notes", label: "Notes", type: "text", width: 220 },
-    ],
-    dateKey: "entry_date",
-  },
-  ringba: {
-    label: "Ringba",
+  daily_ops: {
+    label: "Daily Ops",
     table: "insurance_ringba",
+    description: "Merged Ringba + CallTools daily activity per agent.",
     cols: [
-      { key: "entry_date", label: "Date", type: "date", width: 130 },
-      { key: "week_start", label: "Week Start", type: "date", width: 130 },
-      { key: "agent", label: "Agent/Owner", type: "text" },
-      { key: "ringba_target", label: "Target", type: "text" },
+      { key: "entry_date", label: "Date", type: "date", width: 120 },
+      { key: "week_start", label: "Week Start", type: "date", width: 120 },
+      { key: "agent", label: "Agent", type: "text" },
+      { key: "paid_hours", label: "Paid Hours", type: "number" },
       { key: "incoming", label: "Incoming", type: "number" },
       { key: "completed", label: "Completed", type: "number" },
+      { key: "ended", label: "Ended", type: "number" },
       { key: "connected", label: "Connected", type: "number" },
       { key: "paid_calls", label: "Paid Calls", type: "number" },
-      { key: "cost_to_ray", label: "Cost", type: "number" },
+      { key: "cost_to_ray", label: "Ringba Cost", type: "number" },
       { key: "paid_out_pct", label: "Paid Out %", type: "number" },
-      { key: "acl", label: "ACL", type: "number" },
+      { key: "acl", label: "ACL", type: "text" },
       { key: "ringba_sales", label: "Ringba Sales", type: "number" },
-      { key: "notes", label: "Notes", type: "text", width: 220 },
+      { key: "cost_per_sale", label: "Cost / Sale", type: "number" },
+      { key: "ct_total_dispositions", label: "CT Disp.", type: "number" },
+      { key: "ct_customer_hang_up", label: "CT Hang Up", type: "number" },
+      { key: "ct_call_back_scheduled", label: "CT Callback Sched.", type: "number" },
+      { key: "ct_busy_call_back_later", label: "CT Busy/Later", type: "number" },
+      { key: "ct_sale_made", label: "CT Sale Made", type: "number" },
+      { key: "ct_not_interested", label: "CT Not Int.", type: "number" },
+      { key: "ct_no_contact", label: "CT No Contact", type: "number" },
+      { key: "ct_dnc", label: "CT DNC", type: "number" },
+      { key: "ct_total_calls", label: "CT Total Calls", type: "number" },
+      { key: "ct_inbound_calls", label: "CT Inbound", type: "number" },
+      { key: "ct_outbound_calls", label: "CT Outbound", type: "number" },
+      { key: "ct_phone_hours", label: "CT Phone Hrs", type: "number" },
+      { key: "ringba_cost_status", label: "Ringba Cost Status", type: "text", width: 140 },
+      { key: "calltools_source", label: "CT Source", type: "text" },
+      { key: "manager_notes", label: "Manager Notes", type: "text", width: 220 },
     ],
     dateKey: "entry_date",
+    report: (rows) => {
+      const incoming = rows.reduce((s, r) => s + num(r.incoming), 0);
+      const connected = rows.reduce((s, r) => s + num(r.connected), 0);
+      const paid = rows.reduce((s, r) => s + num(r.paid_calls), 0);
+      const cost = rows.reduce((s, r) => s + num(r.cost_to_ray), 0);
+      const rSales = rows.reduce((s, r) => s + num(r.ringba_sales), 0);
+      const ctSales = rows.reduce((s, r) => s + num(r.ct_sale_made), 0);
+      return [
+        { label: "Incoming", value: incoming.toLocaleString() },
+        { label: "Connect Rate", value: incoming ? `${((connected / incoming) * 100).toFixed(1)}%` : "—" },
+        { label: "Paid Calls", value: paid.toLocaleString() },
+        { label: "Ringba Cost", value: fmtMoney(cost), tone: "destructive" },
+        { label: "Ringba Sales", value: rSales.toString() },
+        { label: "Cost / Ringba Sale", value: rSales ? fmtMoney(cost / rSales) : "—" },
+        { label: "CT Sales Made", value: ctSales.toString(), tone: "primary" },
+      ];
+    },
   },
   paid_qa: {
     label: "Paid Call QA",
     table: "insurance_paid_qa",
+    description: "Per-call QA review of paid Ringba traffic — outcome, loss reason, and follow-up.",
     cols: [
-      { key: "entry_date", label: "Date", type: "date", width: 130 },
+      { key: "entry_date", label: "Date", type: "date", width: 120 },
       { key: "agent", label: "Agent", type: "text" },
-      { key: "ringba_target", label: "Target", type: "text" },
-      { key: "caller_id", label: "Caller ID", type: "text" },
-      { key: "paid_call_cost", label: "Cost", type: "number" },
+      { key: "ringba_target", label: "Ringba Target", type: "text", width: 160 },
+      { key: "caller_id", label: "Caller ID", type: "text", width: 130 },
+      { key: "paid_call_cost", label: "Paid Call Cost", type: "number" },
       { key: "duration", label: "Duration", type: "text" },
       { key: "qa_status", label: "QA Status", type: "text" },
-      { key: "sale_outcome", label: "Outcome", type: "text" },
-      { key: "loss_reason", label: "Loss Reason", type: "text" },
+      { key: "sale_outcome", label: "Sale Outcome", type: "text" },
+      { key: "loss_reason", label: "Loss Reason", type: "text", width: 160 },
       { key: "callback_needed", label: "Callback?", type: "bool" },
-      { key: "follow_up_owner", label: "Follow-up", type: "text" },
+      { key: "follow_up_owner", label: "Follow-up Owner", type: "text" },
+      { key: "payment_method_seen", label: "Payment Method Seen", type: "text", width: 170 },
+      { key: "customer_name", label: "Customer", type: "text", width: 150 },
+      { key: "state", label: "State", type: "text", width: 70 },
+      { key: "policy_number", label: "Policy #", type: "text", width: 120 },
+      { key: "policy_start_date", label: "Policy Start", type: "date", width: 120 },
       { key: "notes", label: "Notes", type: "text", width: 220 },
     ],
     dateKey: "entry_date",
+    report: (rows) => {
+      const cost = rows.reduce((s, r) => s + num(r.paid_call_cost), 0);
+      const sold = rows.filter((r) => String(r.sale_outcome || "").toLowerCase() === "sale").length;
+      const cb = rows.filter((r) => r.callback_needed).length;
+      return [
+        { label: "Calls Reviewed", value: rows.length.toString() },
+        { label: "Sales", value: sold.toString(), tone: "primary" },
+        { label: "Sold %", value: rows.length ? `${((sold / rows.length) * 100).toFixed(1)}%` : "—" },
+        { label: "Total Paid Cost", value: fmtMoney(cost), tone: "destructive" },
+        { label: "Callbacks Needed", value: cb.toString() },
+      ];
+    },
   },
   agent_daily: {
-    label: "Agent Daily",
+    label: "Agent Daily Summary",
     table: "insurance_agent_daily",
+    description: "Manager's daily notes and coaching scores per agent.",
     cols: [
-      { key: "entry_date", label: "Date", type: "date", width: 130 },
-      { key: "week_start", label: "Week Start", type: "date", width: 130 },
+      { key: "entry_date", label: "Date", type: "date", width: 120 },
+      { key: "week_start", label: "Week Start", type: "date", width: 120 },
       { key: "agent", label: "Agent", type: "text" },
       { key: "shift_hours", label: "Shift Hours", type: "number" },
       { key: "manager_score", label: "Mgr Score", type: "number" },
-      { key: "manager_notes", label: "Notes", type: "text", width: 260 },
+      { key: "manager_notes", label: "Manager Notes", type: "text", width: 320 },
     ],
     dateKey: "entry_date",
+    report: (rows) => {
+      const hours = rows.reduce((s, r) => s + num(r.shift_hours), 0);
+      const scored = rows.filter((r) => r.manager_score != null && r.manager_score !== "");
+      const avg = scored.length ? scored.reduce((s, r) => s + num(r.manager_score), 0) / scored.length : 0;
+      return [
+        { label: "Shifts logged", value: rows.length.toString() },
+        { label: "Total Hours", value: hours.toFixed(2) },
+        { label: "Avg Mgr Score", value: scored.length ? avg.toFixed(1) : "—", tone: "primary" },
+      ];
+    },
   },
   payroll: {
-    label: "Weekly Payroll",
+    label: "Payroll & Costs",
     table: "insurance_payroll",
+    description: "Weekly base pay, commission, CallTools + Ringba costs, carrier revenue, net cash position.",
     cols: [
-      { key: "week_start", label: "Week Start", type: "date", width: 130 },
+      { key: "week_start", label: "Week Start", type: "date", width: 120 },
       { key: "agent", label: "Agent", type: "text" },
-      { key: "total_sales", label: "Total Sales", type: "number" },
+      { key: "hourly_rate", label: "Hourly Rate", type: "number" },
+      { key: "paid_hours", label: "Paid Hours", type: "number" },
+      { key: "base_payroll_due", label: "Base Payroll Due", type: "number" },
+      { key: "base_pay_status", label: "Base Pay Status", type: "text", width: 140 },
+      { key: "base_paid_date", label: "Base Paid Date", type: "date", width: 130 },
+      { key: "total_sales", label: "Valid Sales", type: "number" },
       { key: "commission_per_sale", label: "$/Sale", type: "number" },
       { key: "sales_commission", label: "Sales Commission", type: "number" },
       { key: "personal_lead_incentive", label: "Personal Lead", type: "number" },
+      { key: "end_month_agent_payable", label: "End-Month Payable", type: "number", width: 150 },
+      { key: "calltools_weekly_cost", label: "CallTools Weekly", type: "number", width: 140 },
+      { key: "ringba_cost", label: "Ringba Cost", type: "number" },
+      { key: "other_cost", label: "Other Cost", type: "number" },
+      { key: "total_company_cost", label: "Total Company Cost", type: "number", width: 160 },
+      { key: "carrier_revenue_received", label: "Carrier Rev. Recv.", type: "number", width: 150 },
+      { key: "premium_written", label: "Premium Written", type: "number" },
+      { key: "net_cash_position", label: "Net Cash Position", type: "number", width: 150 },
       { key: "total_agent_pay", label: "Total Pay", type: "number" },
       { key: "ringba_sales", label: "Ringba Sales", type: "number" },
       { key: "paid_calls", label: "Paid Calls", type: "number" },
-      { key: "ringba_cost", label: "Ringba Cost", type: "number" },
       { key: "notes", label: "Notes", type: "text", width: 220 },
     ],
     dateKey: "week_start",
+    report: (rows) => {
+      const base = rows.reduce((s, r) => s + num(r.base_payroll_due), 0);
+      const comm = rows.reduce((s, r) => s + num(r.sales_commission), 0);
+      const cost = rows.reduce((s, r) => s + num(r.total_company_cost), 0);
+      const prem = rows.reduce((s, r) => s + num(r.premium_written), 0);
+      const net = rows.reduce((s, r) => s + num(r.net_cash_position), 0);
+      return [
+        { label: "Base Payroll", value: fmtMoney(base) },
+        { label: "Commission", value: fmtMoney(comm) },
+        { label: "Total Company Cost", value: fmtMoney(cost), tone: "destructive" },
+        { label: "Premium Written", value: fmtMoney(prem), tone: "primary" },
+        { label: "Net Cash Position", value: fmtMoney(net), tone: net >= 0 ? "primary" : "destructive" },
+      ];
+    },
+  },
+  payables: {
+    label: "Company Payables",
+    table: "insurance_payables",
+    description: "Ringba, CallTools, Gusto and commission payables — track due dates and payment status.",
+    cols: [
+      { key: "cost_date", label: "Cost Date", type: "date", width: 120 },
+      { key: "week_start", label: "Week Start", type: "date", width: 120 },
+      { key: "month", label: "Month", type: "text", width: 90 },
+      { key: "cost_category", label: "Category", type: "text", width: 160 },
+      { key: "vendor_agent", label: "Vendor / Agent", type: "text", width: 180 },
+      { key: "amount", label: "Amount", type: "number" },
+      { key: "due_date", label: "Due Date", type: "date", width: 120 },
+      { key: "payment_status", label: "Status", type: "text", width: 120 },
+      { key: "paid_date", label: "Paid Date", type: "date", width: 120 },
+      { key: "related_week", label: "Related Week", type: "date", width: 120 },
+      { key: "notes", label: "Notes", type: "text", width: 260 },
+    ],
+    dateKey: "cost_date",
+    report: (rows) => {
+      const total = rows.reduce((s, r) => s + num(r.amount), 0);
+      const paid = rows.filter((r) => String(r.payment_status || "").toLowerCase() === "paid")
+        .reduce((s, r) => s + num(r.amount), 0);
+      const payable = rows.filter((r) => String(r.payment_status || "").toLowerCase() === "payable")
+        .reduce((s, r) => s + num(r.amount), 0);
+      const hold = rows.filter((r) => /hold|not due/i.test(String(r.payment_status || "")))
+        .reduce((s, r) => s + num(r.amount), 0);
+      return [
+        { label: "Total", value: fmtMoney(total) },
+        { label: "Payable", value: fmtMoney(payable), tone: "destructive" },
+        { label: "Paid", value: fmtMoney(paid), tone: "primary" },
+        { label: "Hold / Not Due", value: fmtMoney(hold), tone: "muted" },
+      ];
+    },
   },
   agents: {
-    label: "Agents",
+    label: "Agent Master",
     table: "insurance_agents",
+    description: "Agent roster — status, pay rate, CallTools seat cost, licensed states and product focus.",
     cols: [
       { key: "name", label: "Agent Name", type: "text" },
-      { key: "role", label: "Role", type: "text" },
       { key: "status", label: "Status", type: "text" },
+      { key: "role", label: "Role", type: "text" },
+      { key: "hourly_rate", label: "Hourly Rate", type: "number" },
+      { key: "calltools_seat_cost", label: "CT Seat / mo", type: "number", width: 130 },
+      { key: "licensed_states", label: "Licensed States", type: "text", width: 220 },
+      { key: "primary_carrier", label: "Primary Carrier", type: "text" },
+      { key: "product_focus", label: "Product Focus", type: "text" },
       { key: "notes", label: "Notes", type: "text", width: 280 },
     ],
     dateKey: null,
+    report: (rows) => {
+      const active = rows.filter((r) => String(r.status || "").toLowerCase() === "active").length;
+      const seat = rows.reduce((s, r) => s + num(r.calltools_seat_cost), 0);
+      return [
+        { label: "Agents", value: rows.length.toString() },
+        { label: "Active", value: active.toString(), tone: "primary" },
+        { label: "Monthly Seat Cost", value: fmtMoney(seat), tone: "destructive" },
+      ];
+    },
   },
   tiers: {
     label: "Commission Tiers",
     table: "insurance_commission_tiers",
+    description: "Sales-count brackets and matching commission-per-sale rates used by payroll generation.",
     cols: [
       { key: "tier_name", label: "Tier", type: "text" },
       { key: "min_sales", label: "Min Sales", type: "number" },
@@ -200,6 +359,7 @@ const SHEETS: Record<string, SheetCfg> = {
       { key: "notes", label: "Notes", type: "text", width: 280 },
     ],
     dateKey: null,
+    report: (rows) => [{ label: "Tiers configured", value: rows.length.toString() }],
   },
 };
 
@@ -531,14 +691,16 @@ function SheetGrid({ sheetKey, range, agents }: { sheetKey: SheetKey; range: Dat
     return t;
   }, [allCols, rows]);
 
+  const reportKpis = cfg.report ? cfg.report(rows, isCEO) : [];
+
   return (
     <Card className="border-border/60 shadow-soft">
       <CardContent className="p-4 space-y-3">
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <div>
             <div className="font-display font-semibold text-lg">{cfg.label}</div>
-            <div className="text-xs text-muted-foreground">
-              {rows.length} rows {cfg.dateKey ? "· filtered by date range" : "· all-time"}
+            <div className="text-xs text-muted-foreground max-w-2xl">
+              {cfg.description} · {rows.length} rows {cfg.dateKey ? "in range" : "all-time"}
             </div>
           </div>
           <div className="flex gap-2 flex-wrap">
@@ -558,6 +720,22 @@ function SheetGrid({ sheetKey, range, agents }: { sheetKey: SheetKey; range: Dat
             </Button>
           </div>
         </div>
+
+        {reportKpis.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 rounded-md border border-border/60 bg-muted/30 p-3">
+            {reportKpis.map((k) => (
+              <div key={k.label}>
+                <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">{k.label}</div>
+                <div className={cn(
+                  "font-display font-semibold text-lg mt-0.5 tabular-nums",
+                  k.tone === "primary" && "text-primary",
+                  k.tone === "destructive" && "text-destructive",
+                  k.tone === "muted" && "text-muted-foreground",
+                )}>{k.value}</div>
+              </div>
+            ))}
+          </div>
+        )}
 
         <div className="overflow-auto border border-border/60 rounded-md max-h-[70vh]">
           <table className="w-full text-sm border-collapse">
@@ -990,11 +1168,20 @@ function CeoDashboard({ range, agents }: { range: DateRange; agents: string[] })
       return (data ?? []) as any[];
     },
   });
+  const payables = useQuery({
+    queryKey: ["ins", "insurance_payables", { start, end }],
+    queryFn: async () => {
+      const { data, error } = await client.from("insurance_payables").select("*").gte("cost_date", start).lt("cost_date", end);
+      if (error) throw error;
+      return (data ?? []) as any[];
+    },
+  });
 
   const salesRows = sales.data ?? [];
   const ringbaRows = ringba.data ?? [];
   const dailyRows = daily.data ?? [];
   const payrollRows = payroll.data ?? [];
+  const payablesRows = payables.data ?? [];
 
   const totals = useMemo(() => {
     const counted = salesRows.filter((s) => s.count_sale !== false);
@@ -1113,6 +1300,55 @@ function CeoDashboard({ range, agents }: { range: DateRange; agents: string[] })
               </tbody>
             </table>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-border/60 shadow-soft">
+        <CardContent className="p-5">
+          <div className="font-display font-semibold text-lg mb-3">Company Payables Snapshot</div>
+          {payablesRows.length === 0 ? (
+            <div className="text-xs text-muted-foreground py-6 text-center">
+              No payables recorded in this range. Add rows in the Company Payables tab.
+            </div>
+          ) : (
+            <div className="overflow-auto">
+              <table className="w-full text-sm">
+                <thead className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                  <tr className="border-b border-border/60">
+                    <th className="text-left py-2">Category</th>
+                    <th className="text-right">Payable</th>
+                    <th className="text-right">Paid</th>
+                    <th className="text-right">Hold / Not Due</th>
+                    <th className="text-right">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array.from(
+                    payablesRows.reduce((m: Map<string, any>, r: any) => {
+                      const k = r.cost_category || "—";
+                      const cur = m.get(k) || { cat: k, payable: 0, paid: 0, hold: 0, total: 0 };
+                      const amt = num(r.amount);
+                      cur.total += amt;
+                      const st = String(r.payment_status || "").toLowerCase();
+                      if (st === "paid") cur.paid += amt;
+                      else if (/hold|not due/.test(st)) cur.hold += amt;
+                      else cur.payable += amt;
+                      m.set(k, cur);
+                      return m;
+                    }, new Map()).values(),
+                  ).map((row: any) => (
+                    <tr key={row.cat} className="border-b border-border/40">
+                      <td className="py-2 font-medium">{row.cat}</td>
+                      <td className="text-right font-mono tabular-nums text-destructive">{fmtMoney(row.payable)}</td>
+                      <td className="text-right font-mono tabular-nums text-primary">{fmtMoney(row.paid)}</td>
+                      <td className="text-right font-mono tabular-nums text-muted-foreground">{fmtMoney(row.hold)}</td>
+                      <td className="text-right font-mono tabular-nums">{fmtMoney(row.total)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
