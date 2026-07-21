@@ -58,6 +58,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     { to: "/publishers", label: "Publishers", icon: Wallet },
     { to: "/buyers", label: "Buyers", icon: Handshake },
     { to: "/categories", label: "Categories", icon: Tags },
+    { to: "/insurance-report", label: "Insurance Report", icon: Shield },
     { to: "/ai", label: "AI Assistant", icon: Sparkles },
     { to: "/members", label: "Team", icon: Users },
     { to: "/settings", label: "Settings", icon: Settings },
