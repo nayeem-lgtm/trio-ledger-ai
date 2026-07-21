@@ -1168,11 +1168,20 @@ function CeoDashboard({ range, agents }: { range: DateRange; agents: string[] })
       return (data ?? []) as any[];
     },
   });
+  const payables = useQuery({
+    queryKey: ["ins", "insurance_payables", { start, end }],
+    queryFn: async () => {
+      const { data, error } = await client.from("insurance_payables").select("*").gte("cost_date", start).lt("cost_date", end);
+      if (error) throw error;
+      return (data ?? []) as any[];
+    },
+  });
 
   const salesRows = sales.data ?? [];
   const ringbaRows = ringba.data ?? [];
   const dailyRows = daily.data ?? [];
   const payrollRows = payroll.data ?? [];
+  const payablesRows = payables.data ?? [];
 
   const totals = useMemo(() => {
     const counted = salesRows.filter((s) => s.count_sale !== false);
