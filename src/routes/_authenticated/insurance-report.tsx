@@ -58,6 +58,8 @@ const SHEETS: Record<string, SheetCfg> = {
       { key: "carrier", label: "Carrier", type: "text" },
       { key: "policy_amount", label: "Policy Amount", type: "number" },
       { key: "monthly_premium", label: "Monthly Premium", type: "number" },
+      { key: "__total_commission", label: "Total Commission", type: "number", width: 140 },
+      { key: "__commission_receivable", label: "Commission Receivable (75%)", type: "number", width: 180 },
       { key: "sale_status", label: "Status", type: "text" },
       { key: "count_sale", label: "Count?", type: "bool" },
       { key: "personal_lead_incentive", label: "Personal Lead $", type: "number" },
