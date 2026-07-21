@@ -21,10 +21,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash2, Download, Shield, Columns3, RefreshCw } from "lucide-react";
-import { fmtMoney, buildPreset, rangeToIso, type DateRange } from "@/lib/format";
+import { Plus, Trash2, Download, Shield, Columns3, RefreshCw, ChevronLeft, ChevronRight, Users, X } from "lucide-react";
+import { fmtMoney, buildPreset, rangeToIso, fmtRange, type DateRange } from "@/lib/format";
 import { DateRangePicker } from "@/components/DateRangePicker";
-import { downloadCSV } from "@/lib/reports";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -206,6 +208,16 @@ function num(v: any): number {
 function InsuranceReport() {
   const [tab, setTab] = useState<SheetKey | "summary">("summary");
   const [range, setRange] = useState<DateRange>(() => buildPreset("this_month"));
+  const [agents, setAgents] = useState<string[]>([]);
+
+  const stepRange = (dir: -1 | 1) => {
+    const days = Math.round((range.to.getTime() - range.from.getTime()) / 86_400_000) + 1;
+    const from = new Date(range.from);
+    const to = new Date(range.to);
+    from.setDate(from.getDate() + dir * days);
+    to.setDate(to.getDate() + dir * days);
+    setRange({ from, to });
+  };
 
   return (
     <div className="p-8 space-y-6 max-w-[1600px] mx-auto">
@@ -221,8 +233,38 @@ function InsuranceReport() {
             Editable spreadsheets with add/edit/delete rows &amp; custom columns. Payroll can be auto-generated from Sales &amp; Ringba, then hand-edited.
           </p>
         </div>
-        <DateRangePicker value={range} onChange={setRange} />
+        <div className="flex flex-wrap items-center gap-2">
+          <AgentFilter selected={agents} onChange={setAgents} />
+          <div className="flex items-center gap-1 rounded-md border border-border/60 bg-background">
+            <Button variant="ghost" size="sm" className="h-9 w-9 p-0" onClick={() => stepRange(-1)} title="Previous period">
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <DateRangePicker value={range} onChange={setRange} />
+            <Button variant="ghost" size="sm" className="h-9 w-9 p-0" onClick={() => stepRange(1)} title="Next period">
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
       </header>
+
+      <div className="text-xs text-muted-foreground flex flex-wrap items-center gap-2">
+        <span>Range: <b className="text-foreground">{fmtRange(range)}</b></span>
+        {agents.length > 0 && (
+          <>
+            <span>·</span>
+            <span>Agents:</span>
+            {agents.map((a) => (
+              <Badge key={a} variant="secondary" className="gap-1">
+                {a}
+                <button onClick={() => setAgents(agents.filter((x) => x !== a))} className="hover:text-destructive">
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            ))}
+            <button onClick={() => setAgents([])} className="underline hover:text-foreground">Clear</button>
+          </>
+        )}
+      </div>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
         <TabsList className="flex flex-wrap h-auto">
@@ -233,11 +275,11 @@ function InsuranceReport() {
         </TabsList>
 
         <TabsContent value="summary" className="mt-6">
-          <CeoDashboard range={range} />
+          <CeoDashboard range={range} agents={agents} />
         </TabsContent>
         {(Object.keys(SHEETS) as SheetKey[]).map((k) => (
           <TabsContent key={k} value={k} className="mt-6">
-            <SheetGrid sheetKey={k} range={range} />
+            <SheetGrid sheetKey={k} range={range} agents={agents} />
           </TabsContent>
         ))}
       </Tabs>
@@ -246,14 +288,83 @@ function InsuranceReport() {
 }
 
 /* ------------------------------------------------------------ */
+/* Agent multi-select filter                                     */
+/* ------------------------------------------------------------ */
+
+function AgentFilter({ selected, onChange }: { selected: string[]; onChange: (v: string[]) => void }) {
+  const client = supabase as any;
+  const { data: agentList = [] } = useQuery({
+    queryKey: ["ins-agent-names"],
+    queryFn: async () => {
+      const [a, s, r, d, p] = await Promise.all([
+        client.from("insurance_agents").select("name"),
+        client.from("insurance_sales").select("agent"),
+        client.from("insurance_ringba").select("agent"),
+        client.from("insurance_agent_daily").select("agent"),
+        client.from("insurance_payroll").select("agent"),
+      ]);
+      const set = new Set<string>();
+      for (const row of a.data ?? []) if (row.name) set.add(row.name);
+      for (const src of [s.data, r.data, d.data, p.data]) {
+        for (const row of src ?? []) if (row.agent) set.add(row.agent);
+      }
+      return Array.from(set).sort((x, y) => x.localeCompare(y));
+    },
+  });
+
+  const toggle = (name: string) => {
+    onChange(selected.includes(name) ? selected.filter((n) => n !== name) : [...selected, name]);
+  };
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm" className="h-9 gap-2 font-normal">
+          <Users className="h-4 w-4 opacity-70" />
+          {selected.length === 0 ? "All agents" : `${selected.length} agent${selected.length > 1 ? "s" : ""}`}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-64 p-2">
+        <div className="flex items-center justify-between px-1 pb-2">
+          <span className="text-[11px] uppercase tracking-wider text-muted-foreground">Filter by agent</span>
+          {selected.length > 0 && (
+            <button onClick={() => onChange([])} className="text-xs underline text-muted-foreground hover:text-foreground">
+              Clear
+            </button>
+          )}
+        </div>
+        <div className="max-h-64 overflow-y-auto space-y-1">
+          {agentList.length === 0 && (
+            <div className="text-xs text-muted-foreground px-2 py-4 text-center">No agents yet.</div>
+          )}
+          {agentList.map((name: string) => (
+            <label key={name} className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-accent cursor-pointer text-sm">
+              <Checkbox checked={selected.includes(name)} onCheckedChange={() => toggle(name)} />
+              <span className="truncate">{name}</span>
+            </label>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+/* ------------------------------------------------------------ */
 /* Editable grid with custom columns                              */
 /* ------------------------------------------------------------ */
 
-function SheetGrid({ sheetKey, range }: { sheetKey: SheetKey; range: DateRange }) {
+function SheetGrid({ sheetKey, range, agents }: { sheetKey: SheetKey; range: DateRange; agents: string[] }) {
   const cfg = SHEETS[sheetKey];
   const qc = useQueryClient();
   const client = supabase as any;
   const { start, end } = rangeToIso(range);
+  const hasAgentCol = cfg.cols.some((c) => c.key === "agent");
+  const activeAgents = hasAgentCol ? agents : [];
+  // For weekly payroll, extend start backwards 6 days so weeks that began
+  // before the range but overlap it are included.
+  const effectiveStart = cfg.dateKey === "week_start"
+    ? (() => { const d = new Date(range.from); d.setDate(d.getDate() - 6); return d.toISOString().slice(0, 10); })()
+    : start;
   const [addColOpen, setAddColOpen] = useState(false);
   const [genOpen, setGenOpen] = useState(false);
 
@@ -286,10 +397,11 @@ function SheetGrid({ sheetKey, range }: { sheetKey: SheetKey; range: DateRange }
 
   // Data rows
   const { data: rows = [] } = useQuery({
-    queryKey: ["ins", cfg.table, cfg.dateKey ? { start, end } : null],
+    queryKey: ["ins", cfg.table, cfg.dateKey ? { start: effectiveStart, end } : null, activeAgents],
     queryFn: async () => {
       let q = client.from(cfg.table).select("*").order("created_at", { ascending: false }).limit(1000);
-      if (cfg.dateKey) q = q.gte(cfg.dateKey, start).lt(cfg.dateKey, end);
+      if (cfg.dateKey) q = q.gte(cfg.dateKey, effectiveStart).lt(cfg.dateKey, end);
+      if (activeAgents.length) q = q.in("agent", activeAgents);
       const { data, error } = await q;
       if (error) throw error;
       return (data ?? []) as any[];
@@ -772,42 +884,48 @@ function GeneratePayrollDialog({
 /* CEO Dashboard                                                  */
 /* ------------------------------------------------------------ */
 
-function CeoDashboard({ range }: { range: DateRange }) {
+function CeoDashboard({ range, agents }: { range: DateRange; agents: string[] }) {
   const { start, end } = rangeToIso(range);
   const client = supabase as any;
+  const payrollStart = (() => { const d = new Date(range.from); d.setDate(d.getDate() - 6); return d.toISOString().slice(0, 10); })();
+  const applyAgent = (q: any) => (agents.length ? q.in("agent", agents) : q);
 
   const sales = useQuery({
-    queryKey: ["ins", "insurance_sales", { start, end }],
+    queryKey: ["ins", "insurance_sales", { start, end }, agents],
     queryFn: async () => {
-      const { data, error } = await client.from("insurance_sales").select("*")
-        .gte("sale_date", start).lt("sale_date", end);
+      const { data, error } = await applyAgent(
+        client.from("insurance_sales").select("*").gte("sale_date", start).lt("sale_date", end),
+      );
       if (error) throw error;
       return (data ?? []) as any[];
     },
   });
   const ringba = useQuery({
-    queryKey: ["ins", "insurance_ringba", { start, end }],
+    queryKey: ["ins", "insurance_ringba", { start, end }, agents],
     queryFn: async () => {
-      const { data, error } = await client.from("insurance_ringba").select("*")
-        .gte("entry_date", start).lt("entry_date", end);
+      const { data, error } = await applyAgent(
+        client.from("insurance_ringba").select("*").gte("entry_date", start).lt("entry_date", end),
+      );
       if (error) throw error;
       return (data ?? []) as any[];
     },
   });
   const daily = useQuery({
-    queryKey: ["ins", "insurance_agent_daily", { start, end }],
+    queryKey: ["ins", "insurance_agent_daily", { start, end }, agents],
     queryFn: async () => {
-      const { data, error } = await client.from("insurance_agent_daily").select("*")
-        .gte("entry_date", start).lt("entry_date", end);
+      const { data, error } = await applyAgent(
+        client.from("insurance_agent_daily").select("*").gte("entry_date", start).lt("entry_date", end),
+      );
       if (error) throw error;
       return (data ?? []) as any[];
     },
   });
   const payroll = useQuery({
-    queryKey: ["ins", "insurance_payroll", { start, end }],
+    queryKey: ["ins", "insurance_payroll", { start: payrollStart, end }, agents],
     queryFn: async () => {
-      const { data, error } = await client.from("insurance_payroll").select("*")
-        .gte("week_start", start).lt("week_start", end);
+      const { data, error } = await applyAgent(
+        client.from("insurance_payroll").select("*").gte("week_start", payrollStart).lt("week_start", end),
+      );
       if (error) throw error;
       return (data ?? []) as any[];
     },
