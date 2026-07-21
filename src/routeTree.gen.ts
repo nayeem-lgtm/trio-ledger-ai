@@ -16,6 +16,7 @@ import { Route as AuthenticatedTransactionsRouteImport } from './routes/_authent
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedPublishersRouteImport } from './routes/_authenticated/publishers'
 import { Route as AuthenticatedMembersRouteImport } from './routes/_authenticated/members'
+import { Route as AuthenticatedInsuranceReportRouteImport } from './routes/_authenticated/insurance-report'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCategoriesRouteImport } from './routes/_authenticated/categories'
 import { Route as AuthenticatedBuyersRouteImport } from './routes/_authenticated/buyers'
@@ -58,6 +59,12 @@ const AuthenticatedMembersRoute = AuthenticatedMembersRouteImport.update({
   path: '/members',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedInsuranceReportRoute =
+  AuthenticatedInsuranceReportRouteImport.update({
+    id: '/insurance-report',
+    path: '/insurance-report',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -98,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/buyers': typeof AuthenticatedBuyersRoute
   '/categories': typeof AuthenticatedCategoriesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/insurance-report': typeof AuthenticatedInsuranceReportRoute
   '/members': typeof AuthenticatedMembersRoute
   '/publishers': typeof AuthenticatedPublishersRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRoute
@@ -112,6 +120,7 @@ export interface FileRoutesByTo {
   '/buyers': typeof AuthenticatedBuyersRoute
   '/categories': typeof AuthenticatedCategoriesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/insurance-report': typeof AuthenticatedInsuranceReportRoute
   '/members': typeof AuthenticatedMembersRoute
   '/publishers': typeof AuthenticatedPublishersRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRoute
@@ -128,6 +137,7 @@ export interface FileRoutesById {
   '/_authenticated/buyers': typeof AuthenticatedBuyersRoute
   '/_authenticated/categories': typeof AuthenticatedCategoriesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/insurance-report': typeof AuthenticatedInsuranceReportRoute
   '/_authenticated/members': typeof AuthenticatedMembersRoute
   '/_authenticated/publishers': typeof AuthenticatedPublishersRouteWithChildren
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
     | '/buyers'
     | '/categories'
     | '/dashboard'
+    | '/insurance-report'
     | '/members'
     | '/publishers'
     | '/settings'
@@ -158,6 +169,7 @@ export interface FileRouteTypes {
     | '/buyers'
     | '/categories'
     | '/dashboard'
+    | '/insurance-report'
     | '/members'
     | '/publishers'
     | '/settings'
@@ -173,6 +185,7 @@ export interface FileRouteTypes {
     | '/_authenticated/buyers'
     | '/_authenticated/categories'
     | '/_authenticated/dashboard'
+    | '/_authenticated/insurance-report'
     | '/_authenticated/members'
     | '/_authenticated/publishers'
     | '/_authenticated/settings'
@@ -236,6 +249,13 @@ declare module '@tanstack/react-router' {
       path: '/members'
       fullPath: '/members'
       preLoaderRoute: typeof AuthenticatedMembersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/insurance-report': {
+      id: '/_authenticated/insurance-report'
+      path: '/insurance-report'
+      fullPath: '/insurance-report'
+      preLoaderRoute: typeof AuthenticatedInsuranceReportRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
@@ -303,6 +323,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedBuyersRoute: typeof AuthenticatedBuyersRoute
   AuthenticatedCategoriesRoute: typeof AuthenticatedCategoriesRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedInsuranceReportRoute: typeof AuthenticatedInsuranceReportRoute
   AuthenticatedMembersRoute: typeof AuthenticatedMembersRoute
   AuthenticatedPublishersRoute: typeof AuthenticatedPublishersRouteWithChildren
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
@@ -315,6 +336,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedBuyersRoute: AuthenticatedBuyersRoute,
   AuthenticatedCategoriesRoute: AuthenticatedCategoriesRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedInsuranceReportRoute: AuthenticatedInsuranceReportRoute,
   AuthenticatedMembersRoute: AuthenticatedMembersRoute,
   AuthenticatedPublishersRoute: AuthenticatedPublishersRouteWithChildren,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,

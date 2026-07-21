@@ -191,14 +191,15 @@ function SheetGrid({ sheetKey, range }: { sheetKey: SheetKey; range: DateRange }
   const qc = useQueryClient();
   const { start, end } = rangeToIso(range);
 
+  const client = supabase as any;
   const { data: rows = [] } = useQuery({
     queryKey: ["ins", cfg.table, cfg.dateKey ? { start, end } : null],
     queryFn: async () => {
-      let q = supabase.from(cfg.table).select("*").order("created_at", { ascending: false }).limit(1000);
+      let q = client.from(cfg.table).select("*").order("created_at", { ascending: false }).limit(1000);
       if (cfg.dateKey) q = q.gte(cfg.dateKey, start).lt(cfg.dateKey, end);
       const { data, error } = await q;
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []) as any[];
     },
   });
 
@@ -209,23 +210,22 @@ function SheetGrid({ sheetKey, range }: { sheetKey: SheetKey; range: DateRange }
     if (!u.user) return;
     const seed: Record<string, any> = { owner_id: u.user.id };
     if (cfg.dateKey) seed[cfg.dateKey] = new Date().toISOString().slice(0, 10);
-    if ("week_start" in Object.fromEntries(cfg.cols.map((c) => [c.key, true]))) {
+    if (cfg.cols.some((c) => c.key === "week_start")) {
       const d = new Date();
-      const dow = d.getDay();
-      d.setDate(d.getDate() - dow);
+      d.setDate(d.getDate() - d.getDay());
       seed.week_start = d.toISOString().slice(0, 10);
     }
-    await supabase.from(cfg.table).insert(seed);
+    await client.from(cfg.table).insert(seed);
     invalidate();
   };
 
   const updateCell = async (id: string, key: string, value: any) => {
-    await supabase.from(cfg.table).update({ [key]: value }).eq("id", id);
+    await client.from(cfg.table).update({ [key]: value }).eq("id", id);
     invalidate();
   };
 
   const deleteRow = async (id: string) => {
-    await supabase.from(cfg.table).delete().eq("id", id);
+    await client.from(cfg.table).delete().eq("id", id);
     invalidate();
   };
 
