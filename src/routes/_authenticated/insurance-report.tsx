@@ -353,11 +353,18 @@ function AgentFilter({ selected, onChange }: { selected: string[]; onChange: (v:
 /* Editable grid with custom columns                              */
 /* ------------------------------------------------------------ */
 
-function SheetGrid({ sheetKey, range }: { sheetKey: SheetKey; range: DateRange }) {
+function SheetGrid({ sheetKey, range, agents }: { sheetKey: SheetKey; range: DateRange; agents: string[] }) {
   const cfg = SHEETS[sheetKey];
   const qc = useQueryClient();
   const client = supabase as any;
   const { start, end } = rangeToIso(range);
+  const hasAgentCol = cfg.cols.some((c) => c.key === "agent");
+  const activeAgents = hasAgentCol ? agents : [];
+  // For weekly payroll, extend start backwards 6 days so weeks that began
+  // before the range but overlap it are included.
+  const effectiveStart = cfg.dateKey === "week_start"
+    ? (() => { const d = new Date(range.from); d.setDate(d.getDate() - 6); return d.toISOString().slice(0, 10); })()
+    : start;
   const [addColOpen, setAddColOpen] = useState(false);
   const [genOpen, setGenOpen] = useState(false);
 
