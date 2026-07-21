@@ -1065,6 +1065,18 @@ function CeoDashboard({ range, agents }: { range: DateRange; agents: string[] })
         <Kpi label="Sales / Hour" value={totals.salesPerHour.toFixed(2)} />
       </div>
 
+      {isCEO && (
+        <div className="space-y-2">
+          <div className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground flex items-center gap-2">
+            <Shield className="h-3 w-3" /> CEO · Commission View
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
+            <Kpi label="Total Commission (Premium × 12)" value={fmtMoney(totals.totalCommission)} tone="primary" />
+            <Kpi label="Commission Receivable (75%)" value={fmtMoney(totals.commissionReceivable)} tone="primary" />
+          </div>
+        </div>
+      )}
+
       <Card className="border-border/60 shadow-soft">
         <CardContent className="p-5">
           <div className="font-display font-semibold text-lg mb-3">Agent Performance</div>
