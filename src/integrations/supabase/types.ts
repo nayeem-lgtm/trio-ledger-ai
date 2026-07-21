@@ -324,6 +324,7 @@ export type Database = {
           agent: string | null
           created_at: string
           entry_date: string | null
+          extra: Json
           id: string
           manager_notes: string | null
           manager_score: number | null
@@ -336,6 +337,7 @@ export type Database = {
           agent?: string | null
           created_at?: string
           entry_date?: string | null
+          extra?: Json
           id?: string
           manager_notes?: string | null
           manager_score?: number | null
@@ -348,6 +350,7 @@ export type Database = {
           agent?: string | null
           created_at?: string
           entry_date?: string | null
+          extra?: Json
           id?: string
           manager_notes?: string | null
           manager_score?: number | null
@@ -361,6 +364,7 @@ export type Database = {
       insurance_agents: {
         Row: {
           created_at: string
+          extra: Json
           id: string
           name: string
           notes: string | null
@@ -371,6 +375,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          extra?: Json
           id?: string
           name: string
           notes?: string | null
@@ -381,6 +386,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          extra?: Json
           id?: string
           name?: string
           notes?: string | null
@@ -399,6 +405,7 @@ export type Database = {
           created_at: string
           customer_hang_up: number | null
           entry_date: string | null
+          extra: Json
           goal_disposition: number | null
           id: string
           no_contact: number | null
@@ -416,6 +423,7 @@ export type Database = {
           created_at?: string
           customer_hang_up?: number | null
           entry_date?: string | null
+          extra?: Json
           goal_disposition?: number | null
           id?: string
           no_contact?: number | null
@@ -433,6 +441,7 @@ export type Database = {
           created_at?: string
           customer_hang_up?: number | null
           entry_date?: string | null
+          extra?: Json
           goal_disposition?: number | null
           id?: string
           no_contact?: number | null
@@ -449,6 +458,7 @@ export type Database = {
         Row: {
           commission_per_sale: number | null
           created_at: string
+          extra: Json
           id: string
           max_sales: number | null
           min_sales: number | null
@@ -460,6 +470,7 @@ export type Database = {
         Insert: {
           commission_per_sale?: number | null
           created_at?: string
+          extra?: Json
           id?: string
           max_sales?: number | null
           min_sales?: number | null
@@ -471,12 +482,49 @@ export type Database = {
         Update: {
           commission_per_sale?: number | null
           created_at?: string
+          extra?: Json
           id?: string
           max_sales?: number | null
           min_sales?: number | null
           notes?: string | null
           owner_id?: string
           tier_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      insurance_custom_columns: {
+        Row: {
+          col_key: string
+          col_type: string
+          created_at: string
+          id: string
+          label: string
+          owner_id: string
+          position: number
+          sheet_key: string
+          updated_at: string
+        }
+        Insert: {
+          col_key: string
+          col_type?: string
+          created_at?: string
+          id?: string
+          label: string
+          owner_id: string
+          position?: number
+          sheet_key: string
+          updated_at?: string
+        }
+        Update: {
+          col_key?: string
+          col_type?: string
+          created_at?: string
+          id?: string
+          label?: string
+          owner_id?: string
+          position?: number
+          sheet_key?: string
           updated_at?: string
         }
         Relationships: []
@@ -489,6 +537,7 @@ export type Database = {
           created_at: string
           duration: string | null
           entry_date: string | null
+          extra: Json
           follow_up_owner: string | null
           id: string
           loss_reason: string | null
@@ -507,6 +556,7 @@ export type Database = {
           created_at?: string
           duration?: string | null
           entry_date?: string | null
+          extra?: Json
           follow_up_owner?: string | null
           id?: string
           loss_reason?: string | null
@@ -525,6 +575,7 @@ export type Database = {
           created_at?: string
           duration?: string | null
           entry_date?: string | null
+          extra?: Json
           follow_up_owner?: string | null
           id?: string
           loss_reason?: string | null
@@ -538,6 +589,63 @@ export type Database = {
         }
         Relationships: []
       }
+      insurance_payroll: {
+        Row: {
+          agent: string | null
+          commission_per_sale: number | null
+          created_at: string
+          extra: Json
+          id: string
+          notes: string | null
+          owner_id: string
+          paid_calls: number | null
+          personal_lead_incentive: number | null
+          ringba_cost: number | null
+          ringba_sales: number | null
+          sales_commission: number | null
+          total_agent_pay: number | null
+          total_sales: number | null
+          updated_at: string
+          week_start: string | null
+        }
+        Insert: {
+          agent?: string | null
+          commission_per_sale?: number | null
+          created_at?: string
+          extra?: Json
+          id?: string
+          notes?: string | null
+          owner_id: string
+          paid_calls?: number | null
+          personal_lead_incentive?: number | null
+          ringba_cost?: number | null
+          ringba_sales?: number | null
+          sales_commission?: number | null
+          total_agent_pay?: number | null
+          total_sales?: number | null
+          updated_at?: string
+          week_start?: string | null
+        }
+        Update: {
+          agent?: string | null
+          commission_per_sale?: number | null
+          created_at?: string
+          extra?: Json
+          id?: string
+          notes?: string | null
+          owner_id?: string
+          paid_calls?: number | null
+          personal_lead_incentive?: number | null
+          ringba_cost?: number | null
+          ringba_sales?: number | null
+          sales_commission?: number | null
+          total_agent_pay?: number | null
+          total_sales?: number | null
+          updated_at?: string
+          week_start?: string | null
+        }
+        Relationships: []
+      }
       insurance_ringba: {
         Row: {
           acl: number | null
@@ -547,6 +655,7 @@ export type Database = {
           cost_to_ray: number | null
           created_at: string
           entry_date: string | null
+          extra: Json
           id: string
           incoming: number | null
           notes: string | null
@@ -566,6 +675,7 @@ export type Database = {
           cost_to_ray?: number | null
           created_at?: string
           entry_date?: string | null
+          extra?: Json
           id?: string
           incoming?: number | null
           notes?: string | null
@@ -585,6 +695,7 @@ export type Database = {
           cost_to_ray?: number | null
           created_at?: string
           entry_date?: string | null
+          extra?: Json
           id?: string
           incoming?: number | null
           notes?: string | null
@@ -604,6 +715,7 @@ export type Database = {
           carrier: string | null
           count_sale: boolean | null
           created_at: string
+          extra: Json
           id: string
           monthly_premium: number | null
           notes: string | null
@@ -624,6 +736,7 @@ export type Database = {
           carrier?: string | null
           count_sale?: boolean | null
           created_at?: string
+          extra?: Json
           id?: string
           monthly_premium?: number | null
           notes?: string | null
@@ -644,6 +757,7 @@ export type Database = {
           carrier?: string | null
           count_sale?: boolean | null
           created_at?: string
+          extra?: Json
           id?: string
           monthly_premium?: number | null
           notes?: string | null
