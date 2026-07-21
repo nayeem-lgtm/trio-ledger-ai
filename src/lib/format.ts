@@ -104,6 +104,7 @@ export const buildPreset = (key: PresetKey, now = new Date()): DateRange => {
 };
 
 export const PRESET_LABEL: Record<PresetKey, string> = {
+  today: "Today",
   this_month: "This month",
   last_month: "Last month",
   last_7: "Last 7 days",
