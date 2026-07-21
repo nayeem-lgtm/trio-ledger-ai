@@ -225,6 +225,29 @@ function num(v: any): number {
   return Number.isFinite(n) ? n : 0;
 }
 
+/**
+ * The current user counts as CEO of a workspace when they are the workspace
+ * owner (no team_members row where they are a member). Admin team members also
+ * count. Editors/viewers do not — they should never see commission figures.
+ */
+function useIsCEO() {
+  return useQuery({
+    queryKey: ["is-ceo"],
+    queryFn: async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return false;
+      const { data } = await (supabase as any)
+        .from("team_members")
+        .select("role")
+        .eq("member_user_id", u.user.id);
+      const memberships = (data ?? []) as any[];
+      if (memberships.length === 0) return true; // workspace owner
+      return memberships.some((m) => m.role === "admin");
+    },
+    staleTime: 60_000,
+  });
+}
+
 /* ------------------------------------------------------------ */
 /* Component                                                     */
 /* ------------------------------------------------------------ */
