@@ -21,10 +21,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash2, Download, Shield, Columns3, RefreshCw } from "lucide-react";
-import { fmtMoney, buildPreset, rangeToIso, type DateRange } from "@/lib/format";
+import { Plus, Trash2, Download, Shield, Columns3, RefreshCw, ChevronLeft, ChevronRight, Users, X } from "lucide-react";
+import { fmtMoney, buildPreset, rangeToIso, fmtRange, type DateRange } from "@/lib/format";
 import { DateRangePicker } from "@/components/DateRangePicker";
-import { downloadCSV } from "@/lib/reports";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
