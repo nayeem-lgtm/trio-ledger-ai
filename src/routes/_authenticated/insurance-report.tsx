@@ -401,6 +401,7 @@ function AgentFilter({ selected, onChange }: { selected: string[]; onChange: (v:
 /* ------------------------------------------------------------ */
 
 function SheetGrid({ sheetKey, range, agents }: { sheetKey: SheetKey; range: DateRange; agents: string[] }) {
+  const { data: isCEO = false } = useIsCEO();
   const cfg = SHEETS[sheetKey];
   const qc = useQueryClient();
   const client = supabase as any;
