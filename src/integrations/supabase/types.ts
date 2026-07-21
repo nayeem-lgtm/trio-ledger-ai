@@ -363,34 +363,49 @@ export type Database = {
       }
       insurance_agents: {
         Row: {
+          calltools_seat_cost: number | null
           created_at: string
           extra: Json
+          hourly_rate: number | null
           id: string
+          licensed_states: string | null
           name: string
           notes: string | null
           owner_id: string
+          primary_carrier: string | null
+          product_focus: string | null
           role: string | null
           status: string | null
           updated_at: string
         }
         Insert: {
+          calltools_seat_cost?: number | null
           created_at?: string
           extra?: Json
+          hourly_rate?: number | null
           id?: string
+          licensed_states?: string | null
           name: string
           notes?: string | null
           owner_id: string
+          primary_carrier?: string | null
+          product_focus?: string | null
           role?: string | null
           status?: string | null
           updated_at?: string
         }
         Update: {
+          calltools_seat_cost?: number | null
           created_at?: string
           extra?: Json
+          hourly_rate?: number | null
           id?: string
+          licensed_states?: string | null
           name?: string
           notes?: string | null
           owner_id?: string
+          primary_carrier?: string | null
+          product_focus?: string | null
           role?: string | null
           status?: string | null
           updated_at?: string
@@ -535,6 +550,7 @@ export type Database = {
           callback_needed: boolean | null
           caller_id: string | null
           created_at: string
+          customer_name: string | null
           duration: string | null
           entry_date: string | null
           extra: Json
@@ -544,9 +560,13 @@ export type Database = {
           notes: string | null
           owner_id: string
           paid_call_cost: number | null
+          payment_method_seen: string | null
+          policy_number: string | null
+          policy_start_date: string | null
           qa_status: string | null
           ringba_target: string | null
           sale_outcome: string | null
+          state: string | null
           updated_at: string
         }
         Insert: {
@@ -554,6 +574,7 @@ export type Database = {
           callback_needed?: boolean | null
           caller_id?: string | null
           created_at?: string
+          customer_name?: string | null
           duration?: string | null
           entry_date?: string | null
           extra?: Json
@@ -563,9 +584,13 @@ export type Database = {
           notes?: string | null
           owner_id: string
           paid_call_cost?: number | null
+          payment_method_seen?: string | null
+          policy_number?: string | null
+          policy_start_date?: string | null
           qa_status?: string | null
           ringba_target?: string | null
           sale_outcome?: string | null
+          state?: string | null
           updated_at?: string
         }
         Update: {
@@ -573,6 +598,7 @@ export type Database = {
           callback_needed?: boolean | null
           caller_id?: string | null
           created_at?: string
+          customer_name?: string | null
           duration?: string | null
           entry_date?: string | null
           extra?: Json
@@ -582,64 +608,161 @@ export type Database = {
           notes?: string | null
           owner_id?: string
           paid_call_cost?: number | null
+          payment_method_seen?: string | null
+          policy_number?: string | null
+          policy_start_date?: string | null
           qa_status?: string | null
           ringba_target?: string | null
           sale_outcome?: string | null
+          state?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      insurance_payables: {
+        Row: {
+          amount: number | null
+          cost_category: string | null
+          cost_date: string | null
+          created_at: string
+          due_date: string | null
+          extra: Json
+          id: string
+          month: string | null
+          notes: string | null
+          owner_id: string
+          paid_date: string | null
+          payment_status: string | null
+          related_week: string | null
+          updated_at: string
+          vendor_agent: string | null
+          week_start: string | null
+        }
+        Insert: {
+          amount?: number | null
+          cost_category?: string | null
+          cost_date?: string | null
+          created_at?: string
+          due_date?: string | null
+          extra?: Json
+          id?: string
+          month?: string | null
+          notes?: string | null
+          owner_id: string
+          paid_date?: string | null
+          payment_status?: string | null
+          related_week?: string | null
+          updated_at?: string
+          vendor_agent?: string | null
+          week_start?: string | null
+        }
+        Update: {
+          amount?: number | null
+          cost_category?: string | null
+          cost_date?: string | null
+          created_at?: string
+          due_date?: string | null
+          extra?: Json
+          id?: string
+          month?: string | null
+          notes?: string | null
+          owner_id?: string
+          paid_date?: string | null
+          payment_status?: string | null
+          related_week?: string | null
+          updated_at?: string
+          vendor_agent?: string | null
+          week_start?: string | null
         }
         Relationships: []
       }
       insurance_payroll: {
         Row: {
           agent: string | null
+          base_paid_date: string | null
+          base_pay_status: string | null
+          base_payroll_due: number | null
+          calltools_weekly_cost: number | null
+          carrier_revenue_received: number | null
           commission_per_sale: number | null
           created_at: string
+          end_month_agent_payable: number | null
           extra: Json
+          hourly_rate: number | null
           id: string
+          net_cash_position: number | null
           notes: string | null
+          other_cost: number | null
           owner_id: string
           paid_calls: number | null
+          paid_hours: number | null
           personal_lead_incentive: number | null
+          premium_written: number | null
           ringba_cost: number | null
           ringba_sales: number | null
           sales_commission: number | null
           total_agent_pay: number | null
+          total_company_cost: number | null
           total_sales: number | null
           updated_at: string
           week_start: string | null
         }
         Insert: {
           agent?: string | null
+          base_paid_date?: string | null
+          base_pay_status?: string | null
+          base_payroll_due?: number | null
+          calltools_weekly_cost?: number | null
+          carrier_revenue_received?: number | null
           commission_per_sale?: number | null
           created_at?: string
+          end_month_agent_payable?: number | null
           extra?: Json
+          hourly_rate?: number | null
           id?: string
+          net_cash_position?: number | null
           notes?: string | null
+          other_cost?: number | null
           owner_id: string
           paid_calls?: number | null
+          paid_hours?: number | null
           personal_lead_incentive?: number | null
+          premium_written?: number | null
           ringba_cost?: number | null
           ringba_sales?: number | null
           sales_commission?: number | null
           total_agent_pay?: number | null
+          total_company_cost?: number | null
           total_sales?: number | null
           updated_at?: string
           week_start?: string | null
         }
         Update: {
           agent?: string | null
+          base_paid_date?: string | null
+          base_pay_status?: string | null
+          base_payroll_due?: number | null
+          calltools_weekly_cost?: number | null
+          carrier_revenue_received?: number | null
           commission_per_sale?: number | null
           created_at?: string
+          end_month_agent_payable?: number | null
           extra?: Json
+          hourly_rate?: number | null
           id?: string
+          net_cash_position?: number | null
           notes?: string | null
+          other_cost?: number | null
           owner_id?: string
           paid_calls?: number | null
+          paid_hours?: number | null
           personal_lead_incentive?: number | null
+          premium_written?: number | null
           ringba_cost?: number | null
           ringba_sales?: number | null
           sales_commission?: number | null
           total_agent_pay?: number | null
+          total_company_cost?: number | null
           total_sales?: number | null
           updated_at?: string
           week_start?: string | null
@@ -650,18 +773,36 @@ export type Database = {
         Row: {
           acl: number | null
           agent: string | null
+          calltools_source: string | null
           completed: number | null
           connected: number | null
+          cost_per_sale: number | null
           cost_to_ray: number | null
           created_at: string
+          ct_busy_call_back_later: number | null
+          ct_call_back_scheduled: number | null
+          ct_customer_hang_up: number | null
+          ct_dnc: number | null
+          ct_inbound_calls: number | null
+          ct_no_contact: number | null
+          ct_not_interested: number | null
+          ct_outbound_calls: number | null
+          ct_phone_hours: number | null
+          ct_sale_made: number | null
+          ct_total_calls: number | null
+          ct_total_dispositions: number | null
+          ended: number | null
           entry_date: string | null
           extra: Json
           id: string
           incoming: number | null
+          manager_notes: string | null
           notes: string | null
           owner_id: string
           paid_calls: number | null
+          paid_hours: number | null
           paid_out_pct: number | null
+          ringba_cost_status: string | null
           ringba_sales: number | null
           ringba_target: string | null
           updated_at: string
@@ -670,18 +811,36 @@ export type Database = {
         Insert: {
           acl?: number | null
           agent?: string | null
+          calltools_source?: string | null
           completed?: number | null
           connected?: number | null
+          cost_per_sale?: number | null
           cost_to_ray?: number | null
           created_at?: string
+          ct_busy_call_back_later?: number | null
+          ct_call_back_scheduled?: number | null
+          ct_customer_hang_up?: number | null
+          ct_dnc?: number | null
+          ct_inbound_calls?: number | null
+          ct_no_contact?: number | null
+          ct_not_interested?: number | null
+          ct_outbound_calls?: number | null
+          ct_phone_hours?: number | null
+          ct_sale_made?: number | null
+          ct_total_calls?: number | null
+          ct_total_dispositions?: number | null
+          ended?: number | null
           entry_date?: string | null
           extra?: Json
           id?: string
           incoming?: number | null
+          manager_notes?: string | null
           notes?: string | null
           owner_id: string
           paid_calls?: number | null
+          paid_hours?: number | null
           paid_out_pct?: number | null
+          ringba_cost_status?: string | null
           ringba_sales?: number | null
           ringba_target?: string | null
           updated_at?: string
@@ -690,18 +849,36 @@ export type Database = {
         Update: {
           acl?: number | null
           agent?: string | null
+          calltools_source?: string | null
           completed?: number | null
           connected?: number | null
+          cost_per_sale?: number | null
           cost_to_ray?: number | null
           created_at?: string
+          ct_busy_call_back_later?: number | null
+          ct_call_back_scheduled?: number | null
+          ct_customer_hang_up?: number | null
+          ct_dnc?: number | null
+          ct_inbound_calls?: number | null
+          ct_no_contact?: number | null
+          ct_not_interested?: number | null
+          ct_outbound_calls?: number | null
+          ct_phone_hours?: number | null
+          ct_sale_made?: number | null
+          ct_total_calls?: number | null
+          ct_total_dispositions?: number | null
+          ended?: number | null
           entry_date?: string | null
           extra?: Json
           id?: string
           incoming?: number | null
+          manager_notes?: string | null
           notes?: string | null
           owner_id?: string
           paid_calls?: number | null
+          paid_hours?: number | null
           paid_out_pct?: number | null
+          ringba_cost_status?: string | null
           ringba_sales?: number | null
           ringba_target?: string | null
           updated_at?: string
@@ -712,64 +889,109 @@ export type Database = {
       insurance_sales: {
         Row: {
           agent: string | null
+          callback_converted: boolean | null
           carrier: string | null
+          carrier_revenue_received: boolean | null
+          carrier_revenue_received_amount: number | null
+          commission_eligible: boolean | null
           count_sale: boolean | null
           created_at: string
+          customer_name: string | null
           extra: Json
           id: string
           monthly_premium: number | null
           notes: string | null
           owner_id: string
+          payment_method: string | null
+          payment_risk: string | null
+          payment_status: string | null
           personal_lead_incentive: number | null
+          phone_number: string | null
           policy_amount: number | null
+          policy_number: string | null
           policy_start_date: string | null
+          premium_draft_date: string | null
           product: string | null
+          publisher: string | null
+          qa_status: string | null
+          revenue_received_date: string | null
           ringba_target: string | null
           sale_date: string | null
           sale_status: string | null
           source: string | null
+          state: string | null
           updated_at: string
           week_start: string | null
         }
         Insert: {
           agent?: string | null
+          callback_converted?: boolean | null
           carrier?: string | null
+          carrier_revenue_received?: boolean | null
+          carrier_revenue_received_amount?: number | null
+          commission_eligible?: boolean | null
           count_sale?: boolean | null
           created_at?: string
+          customer_name?: string | null
           extra?: Json
           id?: string
           monthly_premium?: number | null
           notes?: string | null
           owner_id: string
+          payment_method?: string | null
+          payment_risk?: string | null
+          payment_status?: string | null
           personal_lead_incentive?: number | null
+          phone_number?: string | null
           policy_amount?: number | null
+          policy_number?: string | null
           policy_start_date?: string | null
+          premium_draft_date?: string | null
           product?: string | null
+          publisher?: string | null
+          qa_status?: string | null
+          revenue_received_date?: string | null
           ringba_target?: string | null
           sale_date?: string | null
           sale_status?: string | null
           source?: string | null
+          state?: string | null
           updated_at?: string
           week_start?: string | null
         }
         Update: {
           agent?: string | null
+          callback_converted?: boolean | null
           carrier?: string | null
+          carrier_revenue_received?: boolean | null
+          carrier_revenue_received_amount?: number | null
+          commission_eligible?: boolean | null
           count_sale?: boolean | null
           created_at?: string
+          customer_name?: string | null
           extra?: Json
           id?: string
           monthly_premium?: number | null
           notes?: string | null
           owner_id?: string
+          payment_method?: string | null
+          payment_risk?: string | null
+          payment_status?: string | null
           personal_lead_incentive?: number | null
+          phone_number?: string | null
           policy_amount?: number | null
+          policy_number?: string | null
           policy_start_date?: string | null
+          premium_draft_date?: string | null
           product?: string | null
+          publisher?: string | null
+          qa_status?: string | null
+          revenue_received_date?: string | null
           ringba_target?: string | null
           sale_date?: string | null
           sale_status?: string | null
           source?: string | null
+          state?: string | null
           updated_at?: string
           week_start?: string | null
         }
