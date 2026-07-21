@@ -5,24 +5,47 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2, Download, Shield } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Plus, Trash2, Download, Shield, Columns3, RefreshCw } from "lucide-react";
 import { fmtMoney, buildPreset, rangeToIso, type DateRange } from "@/lib/format";
 import { DateRangePicker } from "@/components/DateRangePicker";
 import { downloadCSV } from "@/lib/reports";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/insurance-report")({
   component: InsuranceReport,
 });
 
 type ColType = "text" | "number" | "date" | "bool";
-type Col = { key: string; label: string; type: ColType; width?: number };
+type Col = { key: string; label: string; type: ColType; width?: number; custom?: boolean };
 
-const SHEETS = {
+type SheetCfg = {
+  label: string;
+  table: string;
+  cols: Col[];
+  dateKey: string | null;
+};
+
+const SHEETS: Record<string, SheetCfg> = {
   sales: {
     label: "Sales Log",
-    table: "insurance_sales" as const,
+    table: "insurance_sales",
     cols: [
       { key: "sale_date", label: "Date", type: "date", width: 130 },
       { key: "week_start", label: "Week Start", type: "date", width: 130 },
@@ -38,12 +61,12 @@ const SHEETS = {
       { key: "personal_lead_incentive", label: "Personal Lead $", type: "number" },
       { key: "policy_start_date", label: "Policy Start", type: "date", width: 130 },
       { key: "notes", label: "Notes", type: "text", width: 220 },
-    ] as Col[],
+    ],
     dateKey: "sale_date",
   },
   calltools: {
     label: "CallTools",
-    table: "insurance_calltools" as const,
+    table: "insurance_calltools",
     cols: [
       { key: "entry_date", label: "Date", type: "date", width: 130 },
       { key: "week_start", label: "Week Start", type: "date", width: 130 },
@@ -56,12 +79,12 @@ const SHEETS = {
       { key: "not_interested", label: "Not Interested", type: "number" },
       { key: "no_contact", label: "No Contact", type: "number" },
       { key: "notes", label: "Notes", type: "text", width: 220 },
-    ] as Col[],
+    ],
     dateKey: "entry_date",
   },
   ringba: {
     label: "Ringba",
-    table: "insurance_ringba" as const,
+    table: "insurance_ringba",
     cols: [
       { key: "entry_date", label: "Date", type: "date", width: 130 },
       { key: "week_start", label: "Week Start", type: "date", width: 130 },
@@ -76,12 +99,12 @@ const SHEETS = {
       { key: "acl", label: "ACL", type: "number" },
       { key: "ringba_sales", label: "Ringba Sales", type: "number" },
       { key: "notes", label: "Notes", type: "text", width: 220 },
-    ] as Col[],
+    ],
     dateKey: "entry_date",
   },
   paid_qa: {
     label: "Paid Call QA",
-    table: "insurance_paid_qa" as const,
+    table: "insurance_paid_qa",
     cols: [
       { key: "entry_date", label: "Date", type: "date", width: 130 },
       { key: "agent", label: "Agent", type: "text" },
@@ -95,12 +118,12 @@ const SHEETS = {
       { key: "callback_needed", label: "Callback?", type: "bool" },
       { key: "follow_up_owner", label: "Follow-up", type: "text" },
       { key: "notes", label: "Notes", type: "text", width: 220 },
-    ] as Col[],
+    ],
     dateKey: "entry_date",
   },
   agent_daily: {
     label: "Agent Daily",
-    table: "insurance_agent_daily" as const,
+    table: "insurance_agent_daily",
     cols: [
       { key: "entry_date", label: "Date", type: "date", width: 130 },
       { key: "week_start", label: "Week Start", type: "date", width: 130 },
@@ -108,35 +131,77 @@ const SHEETS = {
       { key: "shift_hours", label: "Shift Hours", type: "number" },
       { key: "manager_score", label: "Mgr Score", type: "number" },
       { key: "manager_notes", label: "Notes", type: "text", width: 260 },
-    ] as Col[],
+    ],
     dateKey: "entry_date",
+  },
+  payroll: {
+    label: "Weekly Payroll",
+    table: "insurance_payroll",
+    cols: [
+      { key: "week_start", label: "Week Start", type: "date", width: 130 },
+      { key: "agent", label: "Agent", type: "text" },
+      { key: "total_sales", label: "Total Sales", type: "number" },
+      { key: "commission_per_sale", label: "$/Sale", type: "number" },
+      { key: "sales_commission", label: "Sales Commission", type: "number" },
+      { key: "personal_lead_incentive", label: "Personal Lead", type: "number" },
+      { key: "total_agent_pay", label: "Total Pay", type: "number" },
+      { key: "ringba_sales", label: "Ringba Sales", type: "number" },
+      { key: "paid_calls", label: "Paid Calls", type: "number" },
+      { key: "ringba_cost", label: "Ringba Cost", type: "number" },
+      { key: "notes", label: "Notes", type: "text", width: 220 },
+    ],
+    dateKey: "week_start",
   },
   agents: {
     label: "Agents",
-    table: "insurance_agents" as const,
+    table: "insurance_agents",
     cols: [
       { key: "name", label: "Agent Name", type: "text" },
       { key: "role", label: "Role", type: "text" },
       { key: "status", label: "Status", type: "text" },
       { key: "notes", label: "Notes", type: "text", width: 280 },
-    ] as Col[],
+    ],
     dateKey: null,
   },
   tiers: {
     label: "Commission Tiers",
-    table: "insurance_commission_tiers" as const,
+    table: "insurance_commission_tiers",
     cols: [
       { key: "tier_name", label: "Tier", type: "text" },
       { key: "min_sales", label: "Min Sales", type: "number" },
       { key: "max_sales", label: "Max Sales", type: "number" },
       { key: "commission_per_sale", label: "$/Sale", type: "number" },
       { key: "notes", label: "Notes", type: "text", width: 280 },
-    ] as Col[],
+    ],
     dateKey: null,
   },
-} as const;
+};
 
 type SheetKey = keyof typeof SHEETS;
+
+/* ------------------------------------------------------------ */
+/* Utilities                                                     */
+/* ------------------------------------------------------------ */
+
+function isoOf(d: Date) {
+  return d.toISOString().slice(0, 10);
+}
+function weekStartOf(dateIso: string | Date | null | undefined): string | null {
+  if (!dateIso) return null;
+  const d = typeof dateIso === "string" ? new Date(dateIso + "T00:00:00") : new Date(dateIso);
+  if (isNaN(d.getTime())) return null;
+  const dow = d.getDay();
+  d.setDate(d.getDate() - dow);
+  return isoOf(d);
+}
+function num(v: any): number {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+}
+
+/* ------------------------------------------------------------ */
+/* Component                                                     */
+/* ------------------------------------------------------------ */
 
 function InsuranceReport() {
   const [tab, setTab] = useState<SheetKey | "summary">("summary");
@@ -153,7 +218,7 @@ function InsuranceReport() {
             Policy Bear Tracker
           </h1>
           <p className="text-sm text-muted-foreground mt-2">
-            Editable spreadsheets for sales, calls, QA, payroll and executive dashboard.
+            Editable spreadsheets with add/edit/delete rows &amp; custom columns. Payroll can be auto-generated from Sales &amp; Ringba, then hand-edited.
           </p>
         </div>
         <DateRangePicker value={range} onChange={setRange} />
@@ -162,7 +227,6 @@ function InsuranceReport() {
       <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
         <TabsList className="flex flex-wrap h-auto">
           <TabsTrigger value="summary">CEO Dashboard</TabsTrigger>
-          <TabsTrigger value="payroll">Weekly Payroll</TabsTrigger>
           {(Object.keys(SHEETS) as SheetKey[]).map((k) => (
             <TabsTrigger key={k} value={k}>{SHEETS[k].label}</TabsTrigger>
           ))}
@@ -170,9 +234,6 @@ function InsuranceReport() {
 
         <TabsContent value="summary" className="mt-6">
           <CeoDashboard range={range} />
-        </TabsContent>
-        <TabsContent value="payroll" className="mt-6">
-          <PayrollView range={range} />
         </TabsContent>
         {(Object.keys(SHEETS) as SheetKey[]).map((k) => (
           <TabsContent key={k} value={k} className="mt-6">
@@ -184,14 +245,46 @@ function InsuranceReport() {
   );
 }
 
-/* ---------- Editable spreadsheet-like grid ---------- */
+/* ------------------------------------------------------------ */
+/* Editable grid with custom columns                              */
+/* ------------------------------------------------------------ */
 
 function SheetGrid({ sheetKey, range }: { sheetKey: SheetKey; range: DateRange }) {
   const cfg = SHEETS[sheetKey];
   const qc = useQueryClient();
-  const { start, end } = rangeToIso(range);
-
   const client = supabase as any;
+  const { start, end } = rangeToIso(range);
+  const [addColOpen, setAddColOpen] = useState(false);
+  const [genOpen, setGenOpen] = useState(false);
+
+  // Custom columns
+  const { data: customCols = [] } = useQuery({
+    queryKey: ["ins-cols", sheetKey],
+    queryFn: async () => {
+      const { data, error } = await client
+        .from("insurance_custom_columns")
+        .select("*")
+        .eq("sheet_key", sheetKey)
+        .order("position");
+      if (error) throw error;
+      return (data ?? []) as any[];
+    },
+  });
+
+  const allCols: Col[] = useMemo(
+    () => [
+      ...cfg.cols,
+      ...customCols.map((c: any) => ({
+        key: c.col_key,
+        label: c.label,
+        type: c.col_type as ColType,
+        custom: true,
+      })),
+    ],
+    [cfg.cols, customCols],
+  );
+
+  // Data rows
   const { data: rows = [] } = useQuery({
     queryKey: ["ins", cfg.table, cfg.dateKey ? { start, end } : null],
     queryFn: async () => {
@@ -208,36 +301,53 @@ function SheetGrid({ sheetKey, range }: { sheetKey: SheetKey; range: DateRange }
   const addRow = async () => {
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) return;
+    const today = isoOf(new Date());
     const seed: Record<string, any> = { owner_id: u.user.id };
-    if (cfg.dateKey) seed[cfg.dateKey] = new Date().toISOString().slice(0, 10);
-    if (cfg.cols.some((c) => c.key === "week_start")) {
-      const d = new Date();
-      d.setDate(d.getDate() - d.getDay());
-      seed.week_start = d.toISOString().slice(0, 10);
-    }
-    await client.from(cfg.table).insert(seed);
-    invalidate();
+    if (cfg.dateKey) seed[cfg.dateKey] = today;
+    if (cfg.cols.some((c) => c.key === "week_start")) seed.week_start = weekStartOf(today);
+    const { error } = await client.from(cfg.table).insert(seed);
+    if (error) toast.error(error.message);
+    else invalidate();
   };
 
-  const updateCell = async (id: string, key: string, value: any) => {
-    await client.from(cfg.table).update({ [key]: value }).eq("id", id);
-    invalidate();
+  const updateCell = async (id: string, col: Col, value: any) => {
+    const patch: Record<string, any> = col.custom
+      ? { extra: { ...(rows.find((r: any) => r.id === id)?.extra || {}), [col.key]: value } }
+      : { [col.key]: value };
+    // Auto-recompute helpers
+    if (!col.custom && cfg.table === "insurance_payroll") {
+      const current = { ...(rows.find((r: any) => r.id === id) || {}), ...patch };
+      const computed = derivePayroll(current);
+      patch.sales_commission = computed.sales_commission;
+      patch.total_agent_pay = computed.total_agent_pay;
+    }
+    const { error } = await client.from(cfg.table).update(patch).eq("id", id);
+    if (error) toast.error(error.message);
+    else invalidate();
   };
 
   const deleteRow = async (id: string) => {
-    await client.from(cfg.table).delete().eq("id", id);
-    invalidate();
+    const { error } = await client.from(cfg.table).delete().eq("id", id);
+    if (error) toast.error(error.message);
+    else invalidate();
+  };
+
+  const removeCustomCol = async (id: string, key: string) => {
+    if (!confirm(`Remove column "${key}"? Data stored under it will be dropped.`)) return;
+    await client.from("insurance_custom_columns").delete().eq("id", id);
+    qc.invalidateQueries({ queryKey: ["ins-cols", sheetKey] });
   };
 
   const exportCsv = () => {
-    const headers = cfg.cols.map((c) => c.label);
+    const headers = allCols.map((c) => c.label);
+    const val = (r: any, c: Col) => (c.custom ? r.extra?.[c.key] : r[c.key]);
     const escape = (v: any) => {
       const s = String(v ?? "");
       return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
     const lines = [
       headers.join(","),
-      ...rows.map((r: any) => cfg.cols.map((c) => escape(r[c.key])).join(",")),
+      ...rows.map((r: any) => allCols.map((c) => escape(val(r, c))).join(",")),
     ];
     const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -248,17 +358,36 @@ function SheetGrid({ sheetKey, range }: { sheetKey: SheetKey; range: DateRange }
     URL.revokeObjectURL(url);
   };
 
+  // Column totals for numeric cols
+  const totals = useMemo(() => {
+    const t: Record<string, number> = {};
+    for (const c of allCols) {
+      if (c.type === "number") {
+        t[c.key] = rows.reduce((s: number, r: any) => s + num(c.custom ? r.extra?.[c.key] : r[c.key]), 0);
+      }
+    }
+    return t;
+  }, [allCols, rows]);
+
   return (
     <Card className="border-border/60 shadow-soft">
       <CardContent className="p-4 space-y-3">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
           <div>
             <div className="font-display font-semibold text-lg">{cfg.label}</div>
             <div className="text-xs text-muted-foreground">
-              {rows.length} rows {cfg.dateKey ? "· filtered by date range" : ""}
+              {rows.length} rows {cfg.dateKey ? "· filtered by date range" : "· all-time"}
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            {sheetKey === "payroll" && (
+              <Button variant="outline" size="sm" onClick={() => setGenOpen(true)} className="gap-1">
+                <RefreshCw className="h-3.5 w-3.5" /> Generate from Sales
+              </Button>
+            )}
+            <Button variant="outline" size="sm" onClick={() => setAddColOpen(true)} className="gap-1">
+              <Columns3 className="h-3.5 w-3.5" /> Add column
+            </Button>
             <Button variant="outline" size="sm" onClick={exportCsv} className="gap-1">
               <Download className="h-3.5 w-3.5" /> CSV
             </Button>
@@ -273,13 +402,27 @@ function SheetGrid({ sheetKey, range }: { sheetKey: SheetKey; range: DateRange }
             <thead className="sticky top-0 bg-muted/80 backdrop-blur z-10">
               <tr>
                 <th className="w-10 border-b border-border/60 text-[10px] text-muted-foreground font-normal p-1">#</th>
-                {cfg.cols.map((c) => (
+                {allCols.map((c) => (
                   <th
                     key={c.key}
-                    className="text-left border-b border-r border-border/60 px-2 py-1.5 text-[11px] uppercase tracking-wider text-muted-foreground font-medium"
+                    className="text-left border-b border-r border-border/60 px-2 py-1.5 text-[11px] uppercase tracking-wider text-muted-foreground font-medium group"
                     style={{ minWidth: c.width ?? 110 }}
                   >
-                    {c.label}
+                    <div className="flex items-center gap-1">
+                      <span>{c.label}</span>
+                      {c.custom && (
+                        <button
+                          onClick={() => {
+                            const meta = customCols.find((cc: any) => cc.col_key === c.key);
+                            if (meta) removeCustomCol(meta.id, c.key);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 text-destructive/60 hover:text-destructive ml-1"
+                          title="Remove column"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      )}
+                    </div>
                   </th>
                 ))}
                 <th className="w-10 border-b border-border/60"></th>
@@ -288,7 +431,7 @@ function SheetGrid({ sheetKey, range }: { sheetKey: SheetKey; range: DateRange }
             <tbody>
               {rows.length === 0 && (
                 <tr>
-                  <td colSpan={cfg.cols.length + 2} className="text-center py-8 text-xs text-muted-foreground">
+                  <td colSpan={allCols.length + 2} className="text-center py-8 text-xs text-muted-foreground">
                     No entries. Click "Add row" to start.
                   </td>
                 </tr>
@@ -296,32 +439,74 @@ function SheetGrid({ sheetKey, range }: { sheetKey: SheetKey; range: DateRange }
               {rows.map((r: any, i: number) => (
                 <tr key={r.id} className="hover:bg-muted/30">
                   <td className="border-b border-border/40 text-center text-[11px] text-muted-foreground p-0.5">{i + 1}</td>
-                  {cfg.cols.map((c) => (
-                    <td key={c.key} className="border-b border-r border-border/40 p-0">
-                      <Cell
-                        value={r[c.key]}
-                        type={c.type}
-                        onCommit={(v) => updateCell(r.id, c.key, v)}
-                      />
-                    </td>
-                  ))}
+                  {allCols.map((c) => {
+                    const v = c.custom ? r.extra?.[c.key] : r[c.key];
+                    return (
+                      <td key={c.key} className="border-b border-r border-border/40 p-0">
+                        <Cell
+                          value={v}
+                          type={c.type}
+                          onCommit={(val) => updateCell(r.id, c, val)}
+                        />
+                      </td>
+                    );
+                  })}
                   <td className="border-b border-border/40 text-center">
                     <button
                       onClick={() => deleteRow(r.id)}
                       className="text-muted-foreground/40 hover:text-destructive p-1"
+                      title="Delete row"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </td>
                 </tr>
               ))}
+              {rows.length > 0 && (
+                <tr className="bg-muted/50 font-medium sticky bottom-0">
+                  <td className="border-t-2 border-border p-1 text-[10px] uppercase text-muted-foreground text-center">Σ</td>
+                  {allCols.map((c) => (
+                    <td key={c.key} className="border-t-2 border-r border-border px-2 py-1.5 text-sm">
+                      {c.type === "number" ? (
+                        <span className="font-mono tabular-nums block text-right">
+                          {c.label.toLowerCase().includes("cost") || c.key.includes("amount") || c.key.includes("premium") || c.key.includes("pay") || c.key.includes("commission") || c.key.includes("incentive")
+                            ? fmtMoney(totals[c.key] || 0)
+                            : (totals[c.key] || 0).toLocaleString()}
+                        </span>
+                      ) : null}
+                    </td>
+                  ))}
+                  <td className="border-t-2 border-border"></td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
       </CardContent>
+
+      <AddColumnDialog
+        open={addColOpen}
+        onOpenChange={setAddColOpen}
+        sheetKey={sheetKey}
+        existingKeys={allCols.map((c) => c.key)}
+        nextPosition={customCols.length}
+        onAdded={() => qc.invalidateQueries({ queryKey: ["ins-cols", sheetKey] })}
+      />
+      {sheetKey === "payroll" && (
+        <GeneratePayrollDialog
+          open={genOpen}
+          onOpenChange={setGenOpen}
+          range={range}
+          onDone={invalidate}
+        />
+      )}
     </Card>
   );
 }
+
+/* ------------------------------------------------------------ */
+/* Cell input                                                    */
+/* ------------------------------------------------------------ */
 
 function Cell({ value, type, onCommit }: { value: any; type: ColType; onCommit: (v: any) => void }) {
   const [local, setLocal] = useState<any>(value ?? "");
@@ -333,7 +518,7 @@ function Cell({ value, type, onCommit }: { value: any; type: ColType; onCommit: 
 
   if (type === "bool") {
     return (
-      <div className="px-2 py-1.5">
+      <div className="px-2 py-1.5 flex justify-center">
         <input
           type="checkbox"
           checked={!!local}
@@ -341,7 +526,7 @@ function Cell({ value, type, onCommit }: { value: any; type: ColType; onCommit: 
             setLocal(e.target.checked);
             onCommit(e.target.checked);
           }}
-          className="accent-primary"
+          className="accent-primary h-4 w-4"
         />
       </div>
     );
@@ -349,7 +534,7 @@ function Cell({ value, type, onCommit }: { value: any; type: ColType; onCommit: 
 
   const commit = () => {
     let v: any = local;
-    if (type === "number") v = local === "" ? null : Number(local);
+    if (type === "number") v = local === "" || local == null ? null : Number(local);
     if (String(v ?? "") !== String(initialRef.current ?? "")) onCommit(v);
   };
 
@@ -366,102 +551,321 @@ function Cell({ value, type, onCommit }: { value: any; type: ColType; onCommit: 
         "w-full bg-transparent px-2 py-1.5 text-sm outline-none focus:bg-primary/5 focus:ring-1 focus:ring-primary/40 rounded-sm",
         type === "number" && "font-mono tabular-nums text-right",
       )}
+      step={type === "number" ? "any" : undefined}
     />
   );
 }
 
-/* ---------- CEO Dashboard ---------- */
+/* ------------------------------------------------------------ */
+/* Add-column dialog                                              */
+/* ------------------------------------------------------------ */
 
-function useInsuranceData(range: DateRange) {
+function AddColumnDialog({
+  open,
+  onOpenChange,
+  sheetKey,
+  existingKeys,
+  nextPosition,
+  onAdded,
+}: {
+  open: boolean;
+  onOpenChange: (b: boolean) => void;
+  sheetKey: string;
+  existingKeys: string[];
+  nextPosition: number;
+  onAdded: () => void;
+}) {
+  const [label, setLabel] = useState("");
+  const [type, setType] = useState<ColType>("text");
+
+  const submit = async () => {
+    const trimmed = label.trim();
+    if (!trimmed) return toast.error("Give the column a name.");
+    const key = trimmed.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
+    if (!key) return toast.error("Invalid column name.");
+    if (existingKeys.includes(key)) return toast.error("Column already exists.");
+    const { data: u } = await supabase.auth.getUser();
+    if (!u.user) return;
+    const { error } = await (supabase as any).from("insurance_custom_columns").insert({
+      owner_id: u.user.id,
+      sheet_key: sheetKey,
+      col_key: key,
+      label: trimmed,
+      col_type: type,
+      position: nextPosition,
+    });
+    if (error) return toast.error(error.message);
+    toast.success("Column added");
+    setLabel("");
+    setType("text");
+    onAdded();
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add custom column</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3">
+          <div className="space-y-1.5">
+            <Label>Column name</Label>
+            <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="e.g. Follow-up notes" />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Type</Label>
+            <Select value={type} onValueChange={(v) => setType(v as ColType)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="text">Text</SelectItem>
+                <SelectItem value="number">Number</SelectItem>
+                <SelectItem value="date">Date</SelectItem>
+                <SelectItem value="bool">Yes / No</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button onClick={submit}>Add column</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ------------------------------------------------------------ */
+/* Payroll derivation                                             */
+/* ------------------------------------------------------------ */
+
+function derivePayroll(row: any) {
+  const commission = num(row.total_sales) * num(row.commission_per_sale);
+  const pay = commission + num(row.personal_lead_incentive);
+  return { sales_commission: commission, total_agent_pay: pay };
+}
+
+function GeneratePayrollDialog({
+  open,
+  onOpenChange,
+  range,
+  onDone,
+}: {
+  open: boolean;
+  onOpenChange: (b: boolean) => void;
+  range: DateRange;
+  onDone: () => void;
+}) {
+  const [replace, setReplace] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const client = supabase as any;
   const { start, end } = rangeToIso(range);
+
+  const run = async () => {
+    setBusy(true);
+    try {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return;
+      const [salesRes, ringbaRes, tiersRes] = await Promise.all([
+        client.from("insurance_sales").select("*").gte("sale_date", start).lt("sale_date", end),
+        client.from("insurance_ringba").select("*").gte("entry_date", start).lt("entry_date", end),
+        client.from("insurance_commission_tiers").select("*"),
+      ]);
+      const sales: any[] = salesRes.data ?? [];
+      const ringba: any[] = ringbaRes.data ?? [];
+      const tiers: any[] = tiersRes.data ?? [];
+
+      const map = new Map<string, any>();
+      for (const s of sales) {
+        if (s.count_sale === false) continue;
+        const ws = s.week_start || weekStartOf(s.sale_date) || start;
+        const agent = s.agent || "—";
+        const key = `${ws}|${agent}`;
+        const cur = map.get(key) || {
+          week_start: ws, agent, total_sales: 0, personal_lead_incentive: 0,
+          ringba_sales: 0, paid_calls: 0, ringba_cost: 0,
+        };
+        cur.total_sales += 1;
+        cur.personal_lead_incentive += num(s.personal_lead_incentive);
+        map.set(key, cur);
+      }
+      for (const r of ringba) {
+        const ws = r.week_start || weekStartOf(r.entry_date) || start;
+        const agent = r.agent || "—";
+        const key = `${ws}|${agent}`;
+        const cur = map.get(key) || {
+          week_start: ws, agent, total_sales: 0, personal_lead_incentive: 0,
+          ringba_sales: 0, paid_calls: 0, ringba_cost: 0,
+        };
+        cur.ringba_sales += num(r.ringba_sales);
+        cur.paid_calls += num(r.paid_calls);
+        cur.ringba_cost += num(r.cost_to_ray);
+        map.set(key, cur);
+      }
+      const sortedTiers = [...tiers].sort((a, b) => num(a.min_sales) - num(b.min_sales));
+      const inserts = Array.from(map.values()).map((r) => {
+        const tier = sortedTiers.find((t) => {
+          const min = num(t.min_sales);
+          const max = t.max_sales == null ? Infinity : num(t.max_sales);
+          return r.total_sales >= min && r.total_sales <= max;
+        });
+        const cps = num(tier?.commission_per_sale);
+        const commission = cps * r.total_sales;
+        return {
+          owner_id: u.user.id,
+          week_start: r.week_start,
+          agent: r.agent,
+          total_sales: r.total_sales,
+          commission_per_sale: cps,
+          sales_commission: commission,
+          personal_lead_incentive: r.personal_lead_incentive,
+          total_agent_pay: commission + r.personal_lead_incentive,
+          ringba_sales: r.ringba_sales,
+          paid_calls: r.paid_calls,
+          ringba_cost: r.ringba_cost,
+          notes: tier?.tier_name ? `Tier: ${tier.tier_name}` : null,
+        };
+      });
+
+      if (replace) {
+        await client.from("insurance_payroll").delete().gte("week_start", start).lt("week_start", end);
+      }
+      if (inserts.length) {
+        const { error } = await client.from("insurance_payroll").insert(inserts);
+        if (error) throw error;
+      }
+      toast.success(`Generated ${inserts.length} payroll rows`);
+      onDone();
+      onOpenChange(false);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Generate weekly payroll</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3 text-sm text-muted-foreground">
+          <p>
+            Aggregates Sales Log &amp; Ringba by <b>week + agent</b> in the selected date range, matches each agent to a commission tier, and writes the rows into the Weekly Payroll sheet where you can edit them by hand.
+          </p>
+          <label className="flex items-center gap-2 text-foreground">
+            <input type="checkbox" checked={replace} onChange={(e) => setReplace(e.target.checked)} className="accent-primary" />
+            Replace existing payroll rows in this range first
+          </label>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button onClick={run} disabled={busy}>{busy ? "Generating…" : "Generate"}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ------------------------------------------------------------ */
+/* CEO Dashboard                                                  */
+/* ------------------------------------------------------------ */
+
+function CeoDashboard({ range }: { range: DateRange }) {
+  const { start, end } = rangeToIso(range);
+  const client = supabase as any;
+
   const sales = useQuery({
     queryKey: ["ins", "insurance_sales", { start, end }],
     queryFn: async () => {
-      const { data, error } = await supabase.from("insurance_sales").select("*")
+      const { data, error } = await client.from("insurance_sales").select("*")
         .gte("sale_date", start).lt("sale_date", end);
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []) as any[];
     },
   });
   const ringba = useQuery({
     queryKey: ["ins", "insurance_ringba", { start, end }],
     queryFn: async () => {
-      const { data, error } = await supabase.from("insurance_ringba").select("*")
+      const { data, error } = await client.from("insurance_ringba").select("*")
         .gte("entry_date", start).lt("entry_date", end);
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []) as any[];
     },
   });
   const daily = useQuery({
     queryKey: ["ins", "insurance_agent_daily", { start, end }],
     queryFn: async () => {
-      const { data, error } = await supabase.from("insurance_agent_daily").select("*")
+      const { data, error } = await client.from("insurance_agent_daily").select("*")
         .gte("entry_date", start).lt("entry_date", end);
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []) as any[];
     },
   });
-  const tiers = useQuery({
-    queryKey: ["ins", "insurance_commission_tiers"],
+  const payroll = useQuery({
+    queryKey: ["ins", "insurance_payroll", { start, end }],
     queryFn: async () => {
-      const { data, error } = await supabase.from("insurance_commission_tiers").select("*");
+      const { data, error } = await client.from("insurance_payroll").select("*")
+        .gte("week_start", start).lt("week_start", end);
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []) as any[];
     },
   });
-  return {
-    sales: sales.data ?? [],
-    ringba: ringba.data ?? [],
-    daily: daily.data ?? [],
-    tiers: tiers.data ?? [],
-  };
-}
 
-function CeoDashboard({ range }: { range: DateRange }) {
-  const { sales, ringba, daily } = useInsuranceData(range);
+  const salesRows = sales.data ?? [];
+  const ringbaRows = ringba.data ?? [];
+  const dailyRows = daily.data ?? [];
+  const payrollRows = payroll.data ?? [];
 
   const totals = useMemo(() => {
-    const counted = sales.filter((s: any) => s.count_sale !== false);
+    const counted = salesRows.filter((s) => s.count_sale !== false);
     const totalSales = counted.length;
-    const policyAmount = counted.reduce((s: number, r: any) => s + Number(r.policy_amount || 0), 0);
-    const monthlyPremium = counted.reduce((s: number, r: any) => s + Number(r.monthly_premium || 0), 0);
-    const personalLead = counted.reduce((s: number, r: any) => s + Number(r.personal_lead_incentive || 0), 0);
-    const ringbaCost = ringba.reduce((s: number, r: any) => s + Number(r.cost_to_ray || 0), 0);
-    const paidCalls = ringba.reduce((s: number, r: any) => s + Number(r.paid_calls || 0), 0);
-    const incoming = ringba.reduce((s: number, r: any) => s + Number(r.incoming || 0), 0);
-    const ringbaSales = ringba.reduce((s: number, r: any) => s + Number(r.ringba_sales || 0), 0);
-    const shiftHours = daily.reduce((s: number, r: any) => s + Number(r.shift_hours || 0), 0);
+    const policyAmount = counted.reduce((s, r) => s + num(r.policy_amount), 0);
+    const monthlyPremium = counted.reduce((s, r) => s + num(r.monthly_premium), 0);
+    const personalLead = counted.reduce((s, r) => s + num(r.personal_lead_incentive), 0);
+    const ringbaCost = ringbaRows.reduce((s, r) => s + num(r.cost_to_ray), 0);
+    const paidCalls = ringbaRows.reduce((s, r) => s + num(r.paid_calls), 0);
+    const incoming = ringbaRows.reduce((s, r) => s + num(r.incoming), 0);
+    const connected = ringbaRows.reduce((s, r) => s + num(r.connected), 0);
+    const ringbaSales = ringbaRows.reduce((s, r) => s + num(r.ringba_sales), 0);
+    const shiftHours = dailyRows.reduce((s, r) => s + num(r.shift_hours), 0);
+    const agentPay = payrollRows.reduce((s, r) => s + num(r.total_agent_pay), 0);
+    const annualized = monthlyPremium * 12;
     return {
-      totalSales,
-      policyAmount,
-      monthlyPremium,
-      personalLead,
-      ringbaCost,
-      paidCalls,
-      incoming,
-      ringbaSales,
-      shiftHours,
-      costPerSale: ringbaSales ? ringbaCost / ringbaSales : 0,
+      totalSales, policyAmount, monthlyPremium, annualized,
+      personalLead, ringbaCost, paidCalls, incoming, connected, ringbaSales,
+      shiftHours, agentPay,
+      costPerRingbaSale: ringbaSales ? ringbaCost / ringbaSales : 0,
+      costPerPaidCall: paidCalls ? ringbaCost / paidCalls : 0,
+      connectRate: incoming ? connected / incoming : 0,
       salesPerHour: shiftHours ? totalSales / shiftHours : 0,
-      net: monthlyPremium * 12 - ringbaCost - personalLead,
+      net: annualized - ringbaCost - personalLead - agentPay,
     };
-  }, [sales, ringba, daily]);
+  }, [salesRows, ringbaRows, dailyRows, payrollRows]);
 
   const byAgent = useMemo(() => {
     const map = new Map<string, any>();
-    for (const s of sales) {
+    for (const s of salesRows) {
       const key = s.agent || "—";
-      const cur = map.get(key) || { agent: key, sales: 0, policy: 0, premium: 0, ringbaSales: 0 };
+      const cur = map.get(key) || { agent: key, sales: 0, policy: 0, premium: 0, ringbaSales: 0, personalLead: 0 };
       if (s.count_sale !== false) {
         cur.sales += 1;
-        cur.policy += Number(s.policy_amount || 0);
-        cur.premium += Number(s.monthly_premium || 0);
+        cur.policy += num(s.policy_amount);
+        cur.premium += num(s.monthly_premium);
+        cur.personalLead += num(s.personal_lead_incentive);
         if (s.source && String(s.source).toLowerCase().includes("ringba")) cur.ringbaSales += 1;
       }
       map.set(key, cur);
     }
+    for (const p of payrollRows) {
+      const key = p.agent || "—";
+      const cur = map.get(key) || { agent: key, sales: 0, policy: 0, premium: 0, ringbaSales: 0, personalLead: 0 };
+      cur.pay = (cur.pay || 0) + num(p.total_agent_pay);
+      map.set(key, cur);
+    }
     return Array.from(map.values()).sort((a, b) => b.premium - a.premium);
-  }, [sales]);
+  }, [salesRows, payrollRows]);
 
   return (
     <div className="space-y-6">
@@ -469,11 +873,15 @@ function CeoDashboard({ range }: { range: DateRange }) {
         <Kpi label="Total Sales" value={totals.totalSales} />
         <Kpi label="Policy Amount" value={fmtMoney(totals.policyAmount)} />
         <Kpi label="Monthly Premium" value={fmtMoney(totals.monthlyPremium)} tone="primary" />
-        <Kpi label="Annualized" value={fmtMoney(totals.monthlyPremium * 12)} tone="primary" />
+        <Kpi label="Annualized" value={fmtMoney(totals.annualized)} tone="primary" />
         <Kpi label="Ringba Cost" value={fmtMoney(totals.ringbaCost)} tone="destructive" />
-        <Kpi label="Paid Calls" value={totals.paidCalls} />
-        <Kpi label="Cost / Ringba Sale" value={fmtMoney(totals.costPerSale)} />
+        <Kpi label="Agent Pay" value={fmtMoney(totals.agentPay)} tone="destructive" />
+        <Kpi label="Cost / Ringba Sale" value={fmtMoney(totals.costPerRingbaSale)} />
         <Kpi label="Net Contribution" value={fmtMoney(totals.net)} tone={totals.net >= 0 ? "primary" : "destructive"} />
+        <Kpi label="Incoming Calls" value={totals.incoming.toLocaleString()} />
+        <Kpi label="Connected Calls" value={totals.connected.toLocaleString()} />
+        <Kpi label="Connect Rate" value={`${(totals.connectRate * 100).toFixed(1)}%`} />
+        <Kpi label="Sales / Hour" value={totals.salesPerHour.toFixed(2)} />
       </div>
 
       <Card className="border-border/60 shadow-soft">
@@ -489,11 +897,13 @@ function CeoDashboard({ range }: { range: DateRange }) {
                   <th className="text-right">Policy Amount</th>
                   <th className="text-right">Monthly Premium</th>
                   <th className="text-right">Annualized</th>
+                  <th className="text-right">Personal Lead</th>
+                  <th className="text-right">Total Pay</th>
                 </tr>
               </thead>
               <tbody>
                 {byAgent.length === 0 && (
-                  <tr><td colSpan={6} className="text-center py-6 text-muted-foreground text-xs">No sales in range.</td></tr>
+                  <tr><td colSpan={8} className="text-center py-6 text-muted-foreground text-xs">No sales in range.</td></tr>
                 )}
                 {byAgent.map((a) => (
                   <tr key={a.agent} className="border-b border-border/40">
@@ -503,6 +913,8 @@ function CeoDashboard({ range }: { range: DateRange }) {
                     <td className="text-right font-mono tabular-nums">{fmtMoney(a.policy)}</td>
                     <td className="text-right font-mono tabular-nums text-primary">{fmtMoney(a.premium)}</td>
                     <td className="text-right font-mono tabular-nums">{fmtMoney(a.premium * 12)}</td>
+                    <td className="text-right font-mono tabular-nums">{fmtMoney(a.personalLead)}</td>
+                    <td className="text-right font-mono tabular-nums">{fmtMoney(a.pay || 0)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -525,133 +937,6 @@ function Kpi({ label, value, tone }: { label: string; value: any; tone?: "primar
           tone === "destructive" && "text-destructive",
         )}>
           {value}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-/* ---------- Weekly Payroll (derived from sales + tiers + ringba) ---------- */
-
-function PayrollView({ range }: { range: DateRange }) {
-  const { sales, ringba, tiers } = useInsuranceData(range);
-
-  const rows = useMemo(() => {
-    const map = new Map<string, any>();
-    for (const s of sales) {
-      if (s.count_sale === false) continue;
-      const ws = s.week_start || s.sale_date || "—";
-      const agent = s.agent || "—";
-      const key = `${ws}|${agent}`;
-      const cur = map.get(key) || {
-        week_start: ws, agent, totalSales: 0, personalLead: 0,
-        ringbaSales: 0, paidCalls: 0, ringbaCost: 0,
-      };
-      cur.totalSales += 1;
-      cur.personalLead += Number(s.personal_lead_incentive || 0);
-      map.set(key, cur);
-    }
-    for (const r of ringba) {
-      const ws = r.week_start || r.entry_date || "—";
-      const agent = r.agent || "—";
-      const key = `${ws}|${agent}`;
-      const cur = map.get(key) || {
-        week_start: ws, agent, totalSales: 0, personalLead: 0,
-        ringbaSales: 0, paidCalls: 0, ringbaCost: 0,
-      };
-      cur.ringbaSales += Number(r.ringba_sales || 0);
-      cur.paidCalls += Number(r.paid_calls || 0);
-      cur.ringbaCost += Number(r.cost_to_ray || 0);
-      map.set(key, cur);
-    }
-    const sortedTiers = [...tiers].sort((a: any, b: any) => (a.min_sales || 0) - (b.min_sales || 0));
-    const list = Array.from(map.values()).map((r) => {
-      const tier = sortedTiers.find((t: any) => {
-        const min = Number(t.min_sales || 0);
-        const max = t.max_sales == null ? Infinity : Number(t.max_sales);
-        return r.totalSales >= min && r.totalSales <= max;
-      });
-      const commissionPerSale = Number(tier?.commission_per_sale || 0);
-      const salesCommission = commissionPerSale * r.totalSales;
-      const totalPay = salesCommission + r.personalLead;
-      const costPerSale = r.ringbaSales ? r.ringbaCost / r.ringbaSales : 0;
-      return { ...r, tier: tier?.tier_name || "—", commissionPerSale, salesCommission, totalPay, costPerSale };
-    });
-    return list.sort((a, b) => (b.week_start > a.week_start ? 1 : -1));
-  }, [sales, ringba, tiers]);
-
-  const totalPayout = rows.reduce((s, r) => s + r.totalPay, 0);
-
-  const exportCsv = () => {
-    downloadCSV(
-      `payroll-${Date.now()}.csv`,
-      rows.map((r) => ({
-        transaction_date: r.week_start,
-        type: "expense" as const,
-        amount: r.totalPay,
-        description: `${r.tier} · ${r.totalSales} sales`,
-        vendor: r.agent,
-        category_name: "Payroll",
-        business_name: "Insurance",
-      })),
-    );
-  };
-
-  return (
-    <Card className="border-border/60 shadow-soft">
-      <CardContent className="p-5 space-y-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="font-display font-semibold text-lg">Weekly Payroll</div>
-            <div className="text-xs text-muted-foreground">
-              Auto-calculated from Sales Log × Commission Tiers · Total payout {fmtMoney(totalPayout)}
-            </div>
-          </div>
-          <Button size="sm" variant="outline" onClick={exportCsv} className="gap-1">
-            <Download className="h-3.5 w-3.5" /> CSV
-          </Button>
-        </div>
-
-        <div className="overflow-auto max-h-[70vh] border border-border/60 rounded-md">
-          <table className="w-full text-sm">
-            <thead className="sticky top-0 bg-muted/80 text-[11px] uppercase tracking-wider text-muted-foreground">
-              <tr>
-                <th className="text-left px-3 py-2">Week</th>
-                <th className="text-left">Agent</th>
-                <th className="text-right">Sales</th>
-                <th className="text-left px-3">Tier</th>
-                <th className="text-right">$/Sale</th>
-                <th className="text-right">Commission</th>
-                <th className="text-right">Personal Lead</th>
-                <th className="text-right px-3">Total Pay</th>
-                <th className="text-right">Ringba Sales</th>
-                <th className="text-right">Paid Calls</th>
-                <th className="text-right">Ringba Cost</th>
-                <th className="text-right px-3">Cost/Sale</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.length === 0 && (
-                <tr><td colSpan={12} className="text-center py-6 text-xs text-muted-foreground">Nothing to pay in this range.</td></tr>
-              )}
-              {rows.map((r, i) => (
-                <tr key={i} className="border-t border-border/40">
-                  <td className="px-3 py-2">{r.week_start}</td>
-                  <td className="font-medium">{r.agent}</td>
-                  <td className="text-right font-mono tabular-nums">{r.totalSales}</td>
-                  <td className="px-3 text-muted-foreground">{r.tier}</td>
-                  <td className="text-right font-mono tabular-nums">{fmtMoney(r.commissionPerSale)}</td>
-                  <td className="text-right font-mono tabular-nums">{fmtMoney(r.salesCommission)}</td>
-                  <td className="text-right font-mono tabular-nums">{fmtMoney(r.personalLead)}</td>
-                  <td className="text-right px-3 font-mono tabular-nums font-semibold text-primary">{fmtMoney(r.totalPay)}</td>
-                  <td className="text-right font-mono tabular-nums">{r.ringbaSales}</td>
-                  <td className="text-right font-mono tabular-nums">{r.paidCalls}</td>
-                  <td className="text-right font-mono tabular-nums text-destructive">{fmtMoney(r.ringbaCost)}</td>
-                  <td className="text-right px-3 font-mono tabular-nums">{fmtMoney(r.costPerSale)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
       </CardContent>
     </Card>
