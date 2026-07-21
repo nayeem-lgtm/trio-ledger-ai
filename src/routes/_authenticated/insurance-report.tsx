@@ -397,10 +397,11 @@ function SheetGrid({ sheetKey, range, agents }: { sheetKey: SheetKey; range: Dat
 
   // Data rows
   const { data: rows = [] } = useQuery({
-    queryKey: ["ins", cfg.table, cfg.dateKey ? { start, end } : null],
+    queryKey: ["ins", cfg.table, cfg.dateKey ? { start: effectiveStart, end } : null, activeAgents],
     queryFn: async () => {
       let q = client.from(cfg.table).select("*").order("created_at", { ascending: false }).limit(1000);
-      if (cfg.dateKey) q = q.gte(cfg.dateKey, start).lt(cfg.dateKey, end);
+      if (cfg.dateKey) q = q.gte(cfg.dateKey, effectiveStart).lt(cfg.dateKey, end);
+      if (activeAgents.length) q = q.in("agent", activeAgents);
       const { data, error } = await q;
       if (error) throw error;
       return (data ?? []) as any[];
