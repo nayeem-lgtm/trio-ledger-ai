@@ -55,6 +55,7 @@ export const previousRange = (r: DateRange): DateRange => {
 };
 
 export type PresetKey =
+  | "today"
   | "this_month"
   | "last_month"
   | "last_7"
@@ -67,7 +68,10 @@ export type PresetKey =
 export const buildPreset = (key: PresetKey, now = new Date()): DateRange => {
   const y = now.getFullYear();
   const m = now.getMonth();
+  const d = now.getDate();
   switch (key) {
+    case "today":
+      return { from: new Date(y, m, d), to: new Date(y, m, d) };
     case "this_month":
       return { from: new Date(y, m, 1), to: new Date(y, m + 1, 0) };
     case "last_month":
@@ -100,6 +104,7 @@ export const buildPreset = (key: PresetKey, now = new Date()): DateRange => {
 };
 
 export const PRESET_LABEL: Record<PresetKey, string> = {
+  today: "Today",
   this_month: "This month",
   last_month: "Last month",
   last_7: "Last 7 days",
