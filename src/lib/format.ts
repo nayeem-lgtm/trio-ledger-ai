@@ -55,6 +55,7 @@ export const previousRange = (r: DateRange): DateRange => {
 };
 
 export type PresetKey =
+  | "today"
   | "this_month"
   | "last_month"
   | "last_7"
