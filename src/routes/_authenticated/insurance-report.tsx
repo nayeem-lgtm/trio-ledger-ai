@@ -498,16 +498,18 @@ function SheetGrid({ sheetKey, range, agents }: { sheetKey: SheetKey; range: Dat
     qc.invalidateQueries({ queryKey: ["ins-cols", sheetKey] });
   };
 
+  const cellValue = (r: any, c: Col) =>
+    c.computed ? c.computed(r) : c.custom ? r.extra?.[c.key] : r[c.key];
+
   const exportCsv = () => {
     const headers = allCols.map((c) => c.label);
-    const val = (r: any, c: Col) => (c.custom ? r.extra?.[c.key] : r[c.key]);
     const escape = (v: any) => {
       const s = String(v ?? "");
       return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
     const lines = [
       headers.join(","),
-      ...rows.map((r: any) => allCols.map((c) => escape(val(r, c))).join(",")),
+      ...rows.map((r: any) => allCols.map((c) => escape(cellValue(r, c))).join(",")),
     ];
     const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -523,7 +525,7 @@ function SheetGrid({ sheetKey, range, agents }: { sheetKey: SheetKey; range: Dat
     const t: Record<string, number> = {};
     for (const c of allCols) {
       if (c.type === "number") {
-        t[c.key] = rows.reduce((s: number, r: any) => s + num(c.custom ? r.extra?.[c.key] : r[c.key]), 0);
+        t[c.key] = rows.reduce((s: number, r: any) => s + num(cellValue(r, c)), 0);
       }
     }
     return t;
