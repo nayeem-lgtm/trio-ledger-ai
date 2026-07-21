@@ -1010,8 +1010,11 @@ function CeoDashboard({ range, agents }: { range: DateRange; agents: string[] })
     const shiftHours = dailyRows.reduce((s, r) => s + num(r.shift_hours), 0);
     const agentPay = payrollRows.reduce((s, r) => s + num(r.total_agent_pay), 0);
     const annualized = monthlyPremium * 12;
+    const totalCommission = annualized; // monthly_premium * 12 per sale, summed
+    const commissionReceivable = totalCommission * 0.75;
     return {
       totalSales, policyAmount, monthlyPremium, annualized,
+      totalCommission, commissionReceivable,
       personalLead, ringbaCost, paidCalls, incoming, connected, ringbaSales,
       shiftHours, agentPay,
       costPerRingbaSale: ringbaSales ? ringbaCost / ringbaSales : 0,
