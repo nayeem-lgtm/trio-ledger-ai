@@ -602,7 +602,16 @@ function SheetGrid({ sheetKey, range, agents }: { sheetKey: SheetKey; range: Dat
                 <tr key={r.id} className="hover:bg-muted/30">
                   <td className="border-b border-border/40 text-center text-[11px] text-muted-foreground p-0.5">{i + 1}</td>
                   {allCols.map((c) => {
-                    const v = c.custom ? r.extra?.[c.key] : r[c.key];
+                    const v = cellValue(r, c);
+                    if (c.computed) {
+                      return (
+                        <td key={c.key} className="border-b border-r border-border/40 px-2 py-1.5 bg-primary/5">
+                          <span className="font-mono tabular-nums block text-right text-primary">
+                            {fmtMoney(num(v))}
+                          </span>
+                        </td>
+                      );
+                    }
                     return (
                       <td key={c.key} className="border-b border-r border-border/40 p-0">
                         <Cell
