@@ -35,7 +35,15 @@ export const Route = createFileRoute("/_authenticated/insurance-report")({
 });
 
 type ColType = "text" | "number" | "date" | "bool";
-type Col = { key: string; label: string; type: ColType; width?: number; custom?: boolean };
+type Col = {
+  key: string;
+  label: string;
+  type: ColType;
+  width?: number;
+  custom?: boolean;
+  computed?: (row: any) => number;
+  ceoOnly?: boolean;
+};
 
 type SheetCfg = {
   label: string;
