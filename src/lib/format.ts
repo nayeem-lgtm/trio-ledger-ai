@@ -68,7 +68,10 @@ export type PresetKey =
 export const buildPreset = (key: PresetKey, now = new Date()): DateRange => {
   const y = now.getFullYear();
   const m = now.getMonth();
+  const d = now.getDate();
   switch (key) {
+    case "today":
+      return { from: new Date(y, m, d), to: new Date(y, m, d) };
     case "this_month":
       return { from: new Date(y, m, 1), to: new Date(y, m + 1, 0) };
     case "last_month":
