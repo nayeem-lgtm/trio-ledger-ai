@@ -432,7 +432,7 @@ function SheetGrid({ sheetKey, range, agents }: { sheetKey: SheetKey; range: Dat
 
   const allCols: Col[] = useMemo(
     () => [
-      ...cfg.cols,
+      ...cfg.cols.filter((c) => (c.ceoOnly ? isCEO : true)),
       ...customCols.map((c: any) => ({
         key: c.col_key,
         label: c.label,
@@ -440,7 +440,7 @@ function SheetGrid({ sheetKey, range, agents }: { sheetKey: SheetKey; range: Dat
         custom: true,
       })),
     ],
-    [cfg.cols, customCols],
+    [cfg.cols, customCols, isCEO],
   );
 
   // Data rows
