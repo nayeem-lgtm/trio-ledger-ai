@@ -884,42 +884,48 @@ function GeneratePayrollDialog({
 /* CEO Dashboard                                                  */
 /* ------------------------------------------------------------ */
 
-function CeoDashboard({ range }: { range: DateRange }) {
+function CeoDashboard({ range, agents }: { range: DateRange; agents: string[] }) {
   const { start, end } = rangeToIso(range);
   const client = supabase as any;
+  const payrollStart = (() => { const d = new Date(range.from); d.setDate(d.getDate() - 6); return d.toISOString().slice(0, 10); })();
+  const applyAgent = (q: any) => (agents.length ? q.in("agent", agents) : q);
 
   const sales = useQuery({
-    queryKey: ["ins", "insurance_sales", { start, end }],
+    queryKey: ["ins", "insurance_sales", { start, end }, agents],
     queryFn: async () => {
-      const { data, error } = await client.from("insurance_sales").select("*")
-        .gte("sale_date", start).lt("sale_date", end);
+      const { data, error } = await applyAgent(
+        client.from("insurance_sales").select("*").gte("sale_date", start).lt("sale_date", end),
+      );
       if (error) throw error;
       return (data ?? []) as any[];
     },
   });
   const ringba = useQuery({
-    queryKey: ["ins", "insurance_ringba", { start, end }],
+    queryKey: ["ins", "insurance_ringba", { start, end }, agents],
     queryFn: async () => {
-      const { data, error } = await client.from("insurance_ringba").select("*")
-        .gte("entry_date", start).lt("entry_date", end);
+      const { data, error } = await applyAgent(
+        client.from("insurance_ringba").select("*").gte("entry_date", start).lt("entry_date", end),
+      );
       if (error) throw error;
       return (data ?? []) as any[];
     },
   });
   const daily = useQuery({
-    queryKey: ["ins", "insurance_agent_daily", { start, end }],
+    queryKey: ["ins", "insurance_agent_daily", { start, end }, agents],
     queryFn: async () => {
-      const { data, error } = await client.from("insurance_agent_daily").select("*")
-        .gte("entry_date", start).lt("entry_date", end);
+      const { data, error } = await applyAgent(
+        client.from("insurance_agent_daily").select("*").gte("entry_date", start).lt("entry_date", end),
+      );
       if (error) throw error;
       return (data ?? []) as any[];
     },
   });
   const payroll = useQuery({
-    queryKey: ["ins", "insurance_payroll", { start, end }],
+    queryKey: ["ins", "insurance_payroll", { start: payrollStart, end }, agents],
     queryFn: async () => {
-      const { data, error } = await client.from("insurance_payroll").select("*")
-        .gte("week_start", start).lt("week_start", end);
+      const { data, error } = await applyAgent(
+        client.from("insurance_payroll").select("*").gte("week_start", payrollStart).lt("week_start", end),
+      );
       if (error) throw error;
       return (data ?? []) as any[];
     },
