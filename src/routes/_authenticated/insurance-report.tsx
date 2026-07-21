@@ -1302,6 +1302,55 @@ function CeoDashboard({ range, agents }: { range: DateRange; agents: string[] })
           </div>
         </CardContent>
       </Card>
+
+      <Card className="border-border/60 shadow-soft">
+        <CardContent className="p-5">
+          <div className="font-display font-semibold text-lg mb-3">Company Payables Snapshot</div>
+          {payablesRows.length === 0 ? (
+            <div className="text-xs text-muted-foreground py-6 text-center">
+              No payables recorded in this range. Add rows in the Company Payables tab.
+            </div>
+          ) : (
+            <div className="overflow-auto">
+              <table className="w-full text-sm">
+                <thead className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                  <tr className="border-b border-border/60">
+                    <th className="text-left py-2">Category</th>
+                    <th className="text-right">Payable</th>
+                    <th className="text-right">Paid</th>
+                    <th className="text-right">Hold / Not Due</th>
+                    <th className="text-right">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array.from(
+                    payablesRows.reduce((m: Map<string, any>, r: any) => {
+                      const k = r.cost_category || "—";
+                      const cur = m.get(k) || { cat: k, payable: 0, paid: 0, hold: 0, total: 0 };
+                      const amt = num(r.amount);
+                      cur.total += amt;
+                      const st = String(r.payment_status || "").toLowerCase();
+                      if (st === "paid") cur.paid += amt;
+                      else if (/hold|not due/.test(st)) cur.hold += amt;
+                      else cur.payable += amt;
+                      m.set(k, cur);
+                      return m;
+                    }, new Map()).values(),
+                  ).map((row: any) => (
+                    <tr key={row.cat} className="border-b border-border/40">
+                      <td className="py-2 font-medium">{row.cat}</td>
+                      <td className="text-right font-mono tabular-nums text-destructive">{fmtMoney(row.payable)}</td>
+                      <td className="text-right font-mono tabular-nums text-primary">{fmtMoney(row.paid)}</td>
+                      <td className="text-right font-mono tabular-nums text-muted-foreground">{fmtMoney(row.hold)}</td>
+                      <td className="text-right font-mono tabular-nums">{fmtMoney(row.total)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
