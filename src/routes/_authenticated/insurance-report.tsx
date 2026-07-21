@@ -208,6 +208,16 @@ function num(v: any): number {
 function InsuranceReport() {
   const [tab, setTab] = useState<SheetKey | "summary">("summary");
   const [range, setRange] = useState<DateRange>(() => buildPreset("this_month"));
+  const [agents, setAgents] = useState<string[]>([]);
+
+  const stepRange = (dir: -1 | 1) => {
+    const days = Math.round((range.to.getTime() - range.from.getTime()) / 86_400_000) + 1;
+    const from = new Date(range.from);
+    const to = new Date(range.to);
+    from.setDate(from.getDate() + dir * days);
+    to.setDate(to.getDate() + dir * days);
+    setRange({ from, to });
+  };
 
   return (
     <div className="p-8 space-y-6 max-w-[1600px] mx-auto">
@@ -223,8 +233,38 @@ function InsuranceReport() {
             Editable spreadsheets with add/edit/delete rows &amp; custom columns. Payroll can be auto-generated from Sales &amp; Ringba, then hand-edited.
           </p>
         </div>
-        <DateRangePicker value={range} onChange={setRange} />
+        <div className="flex flex-wrap items-center gap-2">
+          <AgentFilter selected={agents} onChange={setAgents} />
+          <div className="flex items-center gap-1 rounded-md border border-border/60 bg-background">
+            <Button variant="ghost" size="sm" className="h-9 w-9 p-0" onClick={() => stepRange(-1)} title="Previous period">
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <DateRangePicker value={range} onChange={setRange} />
+            <Button variant="ghost" size="sm" className="h-9 w-9 p-0" onClick={() => stepRange(1)} title="Next period">
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
       </header>
+
+      <div className="text-xs text-muted-foreground flex flex-wrap items-center gap-2">
+        <span>Range: <b className="text-foreground">{fmtRange(range)}</b></span>
+        {agents.length > 0 && (
+          <>
+            <span>·</span>
+            <span>Agents:</span>
+            {agents.map((a) => (
+              <Badge key={a} variant="secondary" className="gap-1">
+                {a}
+                <button onClick={() => setAgents(agents.filter((x) => x !== a))} className="hover:text-destructive">
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            ))}
+            <button onClick={() => setAgents([])} className="underline hover:text-foreground">Clear</button>
+          </>
+        )}
+      </div>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
         <TabsList className="flex flex-wrap h-auto">
@@ -235,15 +275,77 @@ function InsuranceReport() {
         </TabsList>
 
         <TabsContent value="summary" className="mt-6">
-          <CeoDashboard range={range} />
+          <CeoDashboard range={range} agents={agents} />
         </TabsContent>
         {(Object.keys(SHEETS) as SheetKey[]).map((k) => (
           <TabsContent key={k} value={k} className="mt-6">
-            <SheetGrid sheetKey={k} range={range} />
+            <SheetGrid sheetKey={k} range={range} agents={agents} />
           </TabsContent>
         ))}
       </Tabs>
     </div>
+  );
+}
+
+/* ------------------------------------------------------------ */
+/* Agent multi-select filter                                     */
+/* ------------------------------------------------------------ */
+
+function AgentFilter({ selected, onChange }: { selected: string[]; onChange: (v: string[]) => void }) {
+  const client = supabase as any;
+  const { data: agentList = [] } = useQuery({
+    queryKey: ["ins-agent-names"],
+    queryFn: async () => {
+      const [a, s, r, d, p] = await Promise.all([
+        client.from("insurance_agents").select("name"),
+        client.from("insurance_sales").select("agent"),
+        client.from("insurance_ringba").select("agent"),
+        client.from("insurance_agent_daily").select("agent"),
+        client.from("insurance_payroll").select("agent"),
+      ]);
+      const set = new Set<string>();
+      for (const row of a.data ?? []) if (row.name) set.add(row.name);
+      for (const src of [s.data, r.data, d.data, p.data]) {
+        for (const row of src ?? []) if (row.agent) set.add(row.agent);
+      }
+      return Array.from(set).sort((x, y) => x.localeCompare(y));
+    },
+  });
+
+  const toggle = (name: string) => {
+    onChange(selected.includes(name) ? selected.filter((n) => n !== name) : [...selected, name]);
+  };
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm" className="h-9 gap-2 font-normal">
+          <Users className="h-4 w-4 opacity-70" />
+          {selected.length === 0 ? "All agents" : `${selected.length} agent${selected.length > 1 ? "s" : ""}`}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-64 p-2">
+        <div className="flex items-center justify-between px-1 pb-2">
+          <span className="text-[11px] uppercase tracking-wider text-muted-foreground">Filter by agent</span>
+          {selected.length > 0 && (
+            <button onClick={() => onChange([])} className="text-xs underline text-muted-foreground hover:text-foreground">
+              Clear
+            </button>
+          )}
+        </div>
+        <div className="max-h-64 overflow-y-auto space-y-1">
+          {agentList.length === 0 && (
+            <div className="text-xs text-muted-foreground px-2 py-4 text-center">No agents yet.</div>
+          )}
+          {agentList.map((name: string) => (
+            <label key={name} className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-accent cursor-pointer text-sm">
+              <Checkbox checked={selected.includes(name)} onCheckedChange={() => toggle(name)} />
+              <span className="truncate">{name}</span>
+            </label>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
 
