@@ -13,6 +13,7 @@ import {
 } from "@/lib/format";
 
 const PRESETS: PresetKey[] = [
+  "today",
   "this_month",
   "last_month",
   "last_7",
