@@ -35,7 +35,15 @@ export const Route = createFileRoute("/_authenticated/insurance-report")({
 });
 
 type ColType = "text" | "number" | "date" | "bool";
-type Col = { key: string; label: string; type: ColType; width?: number; custom?: boolean };
+type Col = {
+  key: string;
+  label: string;
+  type: ColType;
+  width?: number;
+  custom?: boolean;
+  computed?: (row: any) => number;
+  ceoOnly?: boolean;
+};
 
 type SheetCfg = {
   label: string;
@@ -58,6 +66,22 @@ const SHEETS: Record<string, SheetCfg> = {
       { key: "carrier", label: "Carrier", type: "text" },
       { key: "policy_amount", label: "Policy Amount", type: "number" },
       { key: "monthly_premium", label: "Monthly Premium", type: "number" },
+      {
+        key: "__total_commission",
+        label: "Total Commission",
+        type: "number",
+        width: 140,
+        ceoOnly: true,
+        computed: (r) => num(r.monthly_premium) * 12,
+      },
+      {
+        key: "__commission_receivable",
+        label: "Commission Receivable (75%)",
+        type: "number",
+        width: 180,
+        ceoOnly: true,
+        computed: (r) => num(r.monthly_premium) * 12 * 0.75,
+      },
       { key: "sale_status", label: "Status", type: "text" },
       { key: "count_sale", label: "Count?", type: "bool" },
       { key: "personal_lead_incentive", label: "Personal Lead $", type: "number" },
@@ -199,6 +223,29 @@ function weekStartOf(dateIso: string | Date | null | undefined): string | null {
 function num(v: any): number {
   const n = Number(v);
   return Number.isFinite(n) ? n : 0;
+}
+
+/**
+ * The current user counts as CEO of a workspace when they are the workspace
+ * owner (no team_members row where they are a member). Admin team members also
+ * count. Editors/viewers do not — they should never see commission figures.
+ */
+function useIsCEO() {
+  return useQuery({
+    queryKey: ["is-ceo"],
+    queryFn: async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return false;
+      const { data } = await (supabase as any)
+        .from("team_members")
+        .select("role")
+        .eq("member_user_id", u.user.id);
+      const memberships = (data ?? []) as any[];
+      if (memberships.length === 0) return true; // workspace owner
+      return memberships.some((m) => m.role === "admin");
+    },
+    staleTime: 60_000,
+  });
 }
 
 /* ------------------------------------------------------------ */
@@ -354,6 +401,7 @@ function AgentFilter({ selected, onChange }: { selected: string[]; onChange: (v:
 /* ------------------------------------------------------------ */
 
 function SheetGrid({ sheetKey, range, agents }: { sheetKey: SheetKey; range: DateRange; agents: string[] }) {
+  const { data: isCEO = false } = useIsCEO();
   const cfg = SHEETS[sheetKey];
   const qc = useQueryClient();
   const client = supabase as any;
@@ -384,7 +432,7 @@ function SheetGrid({ sheetKey, range, agents }: { sheetKey: SheetKey; range: Dat
 
   const allCols: Col[] = useMemo(
     () => [
-      ...cfg.cols,
+      ...cfg.cols.filter((c) => (c.ceoOnly ? isCEO : true)),
       ...customCols.map((c: any) => ({
         key: c.col_key,
         label: c.label,
@@ -392,7 +440,7 @@ function SheetGrid({ sheetKey, range, agents }: { sheetKey: SheetKey; range: Dat
         custom: true,
       })),
     ],
-    [cfg.cols, customCols],
+    [cfg.cols, customCols, isCEO],
   );
 
   // Data rows
@@ -450,16 +498,18 @@ function SheetGrid({ sheetKey, range, agents }: { sheetKey: SheetKey; range: Dat
     qc.invalidateQueries({ queryKey: ["ins-cols", sheetKey] });
   };
 
+  const cellValue = (r: any, c: Col) =>
+    c.computed ? c.computed(r) : c.custom ? r.extra?.[c.key] : r[c.key];
+
   const exportCsv = () => {
     const headers = allCols.map((c) => c.label);
-    const val = (r: any, c: Col) => (c.custom ? r.extra?.[c.key] : r[c.key]);
     const escape = (v: any) => {
       const s = String(v ?? "");
       return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
     const lines = [
       headers.join(","),
-      ...rows.map((r: any) => allCols.map((c) => escape(val(r, c))).join(",")),
+      ...rows.map((r: any) => allCols.map((c) => escape(cellValue(r, c))).join(",")),
     ];
     const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -475,7 +525,7 @@ function SheetGrid({ sheetKey, range, agents }: { sheetKey: SheetKey; range: Dat
     const t: Record<string, number> = {};
     for (const c of allCols) {
       if (c.type === "number") {
-        t[c.key] = rows.reduce((s: number, r: any) => s + num(c.custom ? r.extra?.[c.key] : r[c.key]), 0);
+        t[c.key] = rows.reduce((s: number, r: any) => s + num(cellValue(r, c)), 0);
       }
     }
     return t;
@@ -552,7 +602,16 @@ function SheetGrid({ sheetKey, range, agents }: { sheetKey: SheetKey; range: Dat
                 <tr key={r.id} className="hover:bg-muted/30">
                   <td className="border-b border-border/40 text-center text-[11px] text-muted-foreground p-0.5">{i + 1}</td>
                   {allCols.map((c) => {
-                    const v = c.custom ? r.extra?.[c.key] : r[c.key];
+                    const v = cellValue(r, c);
+                    if (c.computed) {
+                      return (
+                        <td key={c.key} className="border-b border-r border-border/40 px-2 py-1.5 bg-primary/5">
+                          <span className="font-mono tabular-nums block text-right text-primary">
+                            {fmtMoney(num(v))}
+                          </span>
+                        </td>
+                      );
+                    }
                     return (
                       <td key={c.key} className="border-b border-r border-border/40 p-0">
                         <Cell
@@ -885,6 +944,7 @@ function GeneratePayrollDialog({
 /* ------------------------------------------------------------ */
 
 function CeoDashboard({ range, agents }: { range: DateRange; agents: string[] }) {
+  const { data: isCEO = false } = useIsCEO();
   const { start, end } = rangeToIso(range);
   const client = supabase as any;
   const payrollStart = (() => { const d = new Date(range.from); d.setDate(d.getDate() - 6); return d.toISOString().slice(0, 10); })();
@@ -950,8 +1010,11 @@ function CeoDashboard({ range, agents }: { range: DateRange; agents: string[] })
     const shiftHours = dailyRows.reduce((s, r) => s + num(r.shift_hours), 0);
     const agentPay = payrollRows.reduce((s, r) => s + num(r.total_agent_pay), 0);
     const annualized = monthlyPremium * 12;
+    const totalCommission = annualized; // monthly_premium * 12 per sale, summed
+    const commissionReceivable = totalCommission * 0.75;
     return {
       totalSales, policyAmount, monthlyPremium, annualized,
+      totalCommission, commissionReceivable,
       personalLead, ringbaCost, paidCalls, incoming, connected, ringbaSales,
       shiftHours, agentPay,
       costPerRingbaSale: ringbaSales ? ringbaCost / ringbaSales : 0,
@@ -1001,6 +1064,18 @@ function CeoDashboard({ range, agents }: { range: DateRange; agents: string[] })
         <Kpi label="Connect Rate" value={`${(totals.connectRate * 100).toFixed(1)}%`} />
         <Kpi label="Sales / Hour" value={totals.salesPerHour.toFixed(2)} />
       </div>
+
+      {isCEO && (
+        <div className="space-y-2">
+          <div className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground flex items-center gap-2">
+            <Shield className="h-3 w-3" /> CEO · Commission View
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
+            <Kpi label="Total Commission (Premium × 12)" value={fmtMoney(totals.totalCommission)} tone="primary" />
+            <Kpi label="Commission Receivable (75%)" value={fmtMoney(totals.commissionReceivable)} tone="primary" />
+          </div>
+        </div>
+      )}
 
       <Card className="border-border/60 shadow-soft">
         <CardContent className="p-5">
