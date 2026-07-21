@@ -691,14 +691,16 @@ function SheetGrid({ sheetKey, range, agents }: { sheetKey: SheetKey; range: Dat
     return t;
   }, [allCols, rows]);
 
+  const reportKpis = cfg.report ? cfg.report(rows, isCEO) : [];
+
   return (
     <Card className="border-border/60 shadow-soft">
       <CardContent className="p-4 space-y-3">
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <div>
             <div className="font-display font-semibold text-lg">{cfg.label}</div>
-            <div className="text-xs text-muted-foreground">
-              {rows.length} rows {cfg.dateKey ? "· filtered by date range" : "· all-time"}
+            <div className="text-xs text-muted-foreground max-w-2xl">
+              {cfg.description} · {rows.length} rows {cfg.dateKey ? "in range" : "all-time"}
             </div>
           </div>
           <div className="flex gap-2 flex-wrap">
@@ -718,6 +720,22 @@ function SheetGrid({ sheetKey, range, agents }: { sheetKey: SheetKey; range: Dat
             </Button>
           </div>
         </div>
+
+        {reportKpis.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 rounded-md border border-border/60 bg-muted/30 p-3">
+            {reportKpis.map((k) => (
+              <div key={k.label}>
+                <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">{k.label}</div>
+                <div className={cn(
+                  "font-display font-semibold text-lg mt-0.5 tabular-nums",
+                  k.tone === "primary" && "text-primary",
+                  k.tone === "destructive" && "text-destructive",
+                  k.tone === "muted" && "text-muted-foreground",
+                )}>{k.value}</div>
+              </div>
+            ))}
+          </div>
+        )}
 
         <div className="overflow-auto border border-border/60 rounded-md max-h-[70vh]">
           <table className="w-full text-sm border-collapse">
