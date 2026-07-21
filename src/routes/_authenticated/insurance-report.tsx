@@ -944,6 +944,7 @@ function GeneratePayrollDialog({
 /* ------------------------------------------------------------ */
 
 function CeoDashboard({ range, agents }: { range: DateRange; agents: string[] }) {
+  const { data: isCEO = false } = useIsCEO();
   const { start, end } = rangeToIso(range);
   const client = supabase as any;
   const payrollStart = (() => { const d = new Date(range.from); d.setDate(d.getDate() - 6); return d.toISOString().slice(0, 10); })();
