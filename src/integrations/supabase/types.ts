@@ -319,6 +319,348 @@ export type Database = {
           },
         ]
       }
+      insurance_agent_daily: {
+        Row: {
+          agent: string | null
+          created_at: string
+          entry_date: string | null
+          id: string
+          manager_notes: string | null
+          manager_score: number | null
+          owner_id: string
+          shift_hours: number | null
+          updated_at: string
+          week_start: string | null
+        }
+        Insert: {
+          agent?: string | null
+          created_at?: string
+          entry_date?: string | null
+          id?: string
+          manager_notes?: string | null
+          manager_score?: number | null
+          owner_id: string
+          shift_hours?: number | null
+          updated_at?: string
+          week_start?: string | null
+        }
+        Update: {
+          agent?: string | null
+          created_at?: string
+          entry_date?: string | null
+          id?: string
+          manager_notes?: string | null
+          manager_score?: number | null
+          owner_id?: string
+          shift_hours?: number | null
+          updated_at?: string
+          week_start?: string | null
+        }
+        Relationships: []
+      }
+      insurance_agents: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          owner_id: string
+          role: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          owner_id: string
+          role?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          owner_id?: string
+          role?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      insurance_calltools: {
+        Row: {
+          agent: string | null
+          busy_call_back_later: number | null
+          call_back_scheduled: number | null
+          created_at: string
+          customer_hang_up: number | null
+          entry_date: string | null
+          goal_disposition: number | null
+          id: string
+          no_contact: number | null
+          not_interested: number | null
+          notes: string | null
+          owner_id: string
+          total_dispositions: number | null
+          updated_at: string
+          week_start: string | null
+        }
+        Insert: {
+          agent?: string | null
+          busy_call_back_later?: number | null
+          call_back_scheduled?: number | null
+          created_at?: string
+          customer_hang_up?: number | null
+          entry_date?: string | null
+          goal_disposition?: number | null
+          id?: string
+          no_contact?: number | null
+          not_interested?: number | null
+          notes?: string | null
+          owner_id: string
+          total_dispositions?: number | null
+          updated_at?: string
+          week_start?: string | null
+        }
+        Update: {
+          agent?: string | null
+          busy_call_back_later?: number | null
+          call_back_scheduled?: number | null
+          created_at?: string
+          customer_hang_up?: number | null
+          entry_date?: string | null
+          goal_disposition?: number | null
+          id?: string
+          no_contact?: number | null
+          not_interested?: number | null
+          notes?: string | null
+          owner_id?: string
+          total_dispositions?: number | null
+          updated_at?: string
+          week_start?: string | null
+        }
+        Relationships: []
+      }
+      insurance_commission_tiers: {
+        Row: {
+          commission_per_sale: number | null
+          created_at: string
+          id: string
+          max_sales: number | null
+          min_sales: number | null
+          notes: string | null
+          owner_id: string
+          tier_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          commission_per_sale?: number | null
+          created_at?: string
+          id?: string
+          max_sales?: number | null
+          min_sales?: number | null
+          notes?: string | null
+          owner_id: string
+          tier_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          commission_per_sale?: number | null
+          created_at?: string
+          id?: string
+          max_sales?: number | null
+          min_sales?: number | null
+          notes?: string | null
+          owner_id?: string
+          tier_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      insurance_paid_qa: {
+        Row: {
+          agent: string | null
+          callback_needed: boolean | null
+          caller_id: string | null
+          created_at: string
+          duration: string | null
+          entry_date: string | null
+          follow_up_owner: string | null
+          id: string
+          loss_reason: string | null
+          notes: string | null
+          owner_id: string
+          paid_call_cost: number | null
+          qa_status: string | null
+          ringba_target: string | null
+          sale_outcome: string | null
+          updated_at: string
+        }
+        Insert: {
+          agent?: string | null
+          callback_needed?: boolean | null
+          caller_id?: string | null
+          created_at?: string
+          duration?: string | null
+          entry_date?: string | null
+          follow_up_owner?: string | null
+          id?: string
+          loss_reason?: string | null
+          notes?: string | null
+          owner_id: string
+          paid_call_cost?: number | null
+          qa_status?: string | null
+          ringba_target?: string | null
+          sale_outcome?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agent?: string | null
+          callback_needed?: boolean | null
+          caller_id?: string | null
+          created_at?: string
+          duration?: string | null
+          entry_date?: string | null
+          follow_up_owner?: string | null
+          id?: string
+          loss_reason?: string | null
+          notes?: string | null
+          owner_id?: string
+          paid_call_cost?: number | null
+          qa_status?: string | null
+          ringba_target?: string | null
+          sale_outcome?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      insurance_ringba: {
+        Row: {
+          acl: number | null
+          agent: string | null
+          completed: number | null
+          connected: number | null
+          cost_to_ray: number | null
+          created_at: string
+          entry_date: string | null
+          id: string
+          incoming: number | null
+          notes: string | null
+          owner_id: string
+          paid_calls: number | null
+          paid_out_pct: number | null
+          ringba_sales: number | null
+          ringba_target: string | null
+          updated_at: string
+          week_start: string | null
+        }
+        Insert: {
+          acl?: number | null
+          agent?: string | null
+          completed?: number | null
+          connected?: number | null
+          cost_to_ray?: number | null
+          created_at?: string
+          entry_date?: string | null
+          id?: string
+          incoming?: number | null
+          notes?: string | null
+          owner_id: string
+          paid_calls?: number | null
+          paid_out_pct?: number | null
+          ringba_sales?: number | null
+          ringba_target?: string | null
+          updated_at?: string
+          week_start?: string | null
+        }
+        Update: {
+          acl?: number | null
+          agent?: string | null
+          completed?: number | null
+          connected?: number | null
+          cost_to_ray?: number | null
+          created_at?: string
+          entry_date?: string | null
+          id?: string
+          incoming?: number | null
+          notes?: string | null
+          owner_id?: string
+          paid_calls?: number | null
+          paid_out_pct?: number | null
+          ringba_sales?: number | null
+          ringba_target?: string | null
+          updated_at?: string
+          week_start?: string | null
+        }
+        Relationships: []
+      }
+      insurance_sales: {
+        Row: {
+          agent: string | null
+          carrier: string | null
+          count_sale: boolean | null
+          created_at: string
+          id: string
+          monthly_premium: number | null
+          notes: string | null
+          owner_id: string
+          personal_lead_incentive: number | null
+          policy_amount: number | null
+          policy_start_date: string | null
+          product: string | null
+          ringba_target: string | null
+          sale_date: string | null
+          sale_status: string | null
+          source: string | null
+          updated_at: string
+          week_start: string | null
+        }
+        Insert: {
+          agent?: string | null
+          carrier?: string | null
+          count_sale?: boolean | null
+          created_at?: string
+          id?: string
+          monthly_premium?: number | null
+          notes?: string | null
+          owner_id: string
+          personal_lead_incentive?: number | null
+          policy_amount?: number | null
+          policy_start_date?: string | null
+          product?: string | null
+          ringba_target?: string | null
+          sale_date?: string | null
+          sale_status?: string | null
+          source?: string | null
+          updated_at?: string
+          week_start?: string | null
+        }
+        Update: {
+          agent?: string | null
+          carrier?: string | null
+          count_sale?: boolean | null
+          created_at?: string
+          id?: string
+          monthly_premium?: number | null
+          notes?: string | null
+          owner_id?: string
+          personal_lead_incentive?: number | null
+          policy_amount?: number | null
+          policy_start_date?: string | null
+          product?: string | null
+          ringba_target?: string | null
+          sale_date?: string | null
+          sale_status?: string | null
+          source?: string | null
+          updated_at?: string
+          week_start?: string | null
+        }
+        Relationships: []
+      }
       invoice_items: {
         Row: {
           amount: number
