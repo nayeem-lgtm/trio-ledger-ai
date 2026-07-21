@@ -15,6 +15,7 @@ import {
   Users,
   Handshake,
   Wallet,
+  Shield,
 
 } from "lucide-react";
 import { cn } from "@/lib/utils";
