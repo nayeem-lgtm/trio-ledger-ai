@@ -64,7 +64,7 @@ export function InsuranceShell({ children }: { children?: ReactNode }) {
 
   const groups = ["Reports", "Operations"] as const;
 
-  const activePage = NAV.find((n) => (n.exact ? pathname === n.to : pathname === n.to));
+  const activePage = NAV.find((n) => (pathname === n.to));
   const pageTitle = activePage?.label ?? "Overview";
 
   return (
@@ -89,7 +89,7 @@ export function InsuranceShell({ children }: { children?: ReactNode }) {
                 </div>
                 <div className="px-2 space-y-0.5">
                   {NAV.filter((n) => n.group === g).map((n) => {
-                    const active = n.exact ? pathname === n.to : pathname === n.to;
+                    const active = pathname === n.to;
                     return (
                       <Link
                         key={n.to}
