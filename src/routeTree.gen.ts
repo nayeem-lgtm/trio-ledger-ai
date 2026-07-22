@@ -30,6 +30,7 @@ import { Route as AuthenticatedInsuranceQaRouteImport } from './routes/_authenti
 import { Route as AuthenticatedInsurancePayrollRouteImport } from './routes/_authenticated/insurance/payroll'
 import { Route as AuthenticatedInsurancePayablesRouteImport } from './routes/_authenticated/insurance/payables'
 import { Route as AuthenticatedInsuranceDailyOpsRouteImport } from './routes/_authenticated/insurance/daily-ops'
+import { Route as AuthenticatedInsuranceChecklistRouteImport } from './routes/_authenticated/insurance/checklist'
 import { Route as AuthenticatedInsuranceAgentsRouteImport } from './routes/_authenticated/insurance/agents'
 import { Route as AuthenticatedBusinessBusinessIdRouteImport } from './routes/_authenticated/business.$businessId'
 
@@ -148,6 +149,12 @@ const AuthenticatedInsuranceDailyOpsRoute =
     path: '/daily-ops',
     getParentRoute: () => AuthenticatedInsuranceRouteRoute,
   } as any)
+const AuthenticatedInsuranceChecklistRoute =
+  AuthenticatedInsuranceChecklistRouteImport.update({
+    id: '/checklist',
+    path: '/checklist',
+    getParentRoute: () => AuthenticatedInsuranceRouteRoute,
+  } as any)
 const AuthenticatedInsuranceAgentsRoute =
   AuthenticatedInsuranceAgentsRouteImport.update({
     id: '/agents',
@@ -176,6 +183,7 @@ export interface FileRoutesByFullPath {
   '/transactions': typeof AuthenticatedTransactionsRoute
   '/business/$businessId': typeof AuthenticatedBusinessBusinessIdRoute
   '/insurance/agents': typeof AuthenticatedInsuranceAgentsRoute
+  '/insurance/checklist': typeof AuthenticatedInsuranceChecklistRoute
   '/insurance/daily-ops': typeof AuthenticatedInsuranceDailyOpsRoute
   '/insurance/payables': typeof AuthenticatedInsurancePayablesRoute
   '/insurance/payroll': typeof AuthenticatedInsurancePayrollRoute
@@ -199,6 +207,7 @@ export interface FileRoutesByTo {
   '/transactions': typeof AuthenticatedTransactionsRoute
   '/business/$businessId': typeof AuthenticatedBusinessBusinessIdRoute
   '/insurance/agents': typeof AuthenticatedInsuranceAgentsRoute
+  '/insurance/checklist': typeof AuthenticatedInsuranceChecklistRoute
   '/insurance/daily-ops': typeof AuthenticatedInsuranceDailyOpsRoute
   '/insurance/payables': typeof AuthenticatedInsurancePayablesRoute
   '/insurance/payroll': typeof AuthenticatedInsurancePayrollRoute
@@ -225,6 +234,7 @@ export interface FileRoutesById {
   '/_authenticated/transactions': typeof AuthenticatedTransactionsRoute
   '/_authenticated/business/$businessId': typeof AuthenticatedBusinessBusinessIdRoute
   '/_authenticated/insurance/agents': typeof AuthenticatedInsuranceAgentsRoute
+  '/_authenticated/insurance/checklist': typeof AuthenticatedInsuranceChecklistRoute
   '/_authenticated/insurance/daily-ops': typeof AuthenticatedInsuranceDailyOpsRoute
   '/_authenticated/insurance/payables': typeof AuthenticatedInsurancePayablesRoute
   '/_authenticated/insurance/payroll': typeof AuthenticatedInsurancePayrollRoute
@@ -251,6 +261,7 @@ export interface FileRouteTypes {
     | '/transactions'
     | '/business/$businessId'
     | '/insurance/agents'
+    | '/insurance/checklist'
     | '/insurance/daily-ops'
     | '/insurance/payables'
     | '/insurance/payroll'
@@ -274,6 +285,7 @@ export interface FileRouteTypes {
     | '/transactions'
     | '/business/$businessId'
     | '/insurance/agents'
+    | '/insurance/checklist'
     | '/insurance/daily-ops'
     | '/insurance/payables'
     | '/insurance/payroll'
@@ -299,6 +311,7 @@ export interface FileRouteTypes {
     | '/_authenticated/transactions'
     | '/_authenticated/business/$businessId'
     | '/_authenticated/insurance/agents'
+    | '/_authenticated/insurance/checklist'
     | '/_authenticated/insurance/daily-ops'
     | '/_authenticated/insurance/payables'
     | '/_authenticated/insurance/payroll'
@@ -464,6 +477,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInsuranceDailyOpsRouteImport
       parentRoute: typeof AuthenticatedInsuranceRouteRoute
     }
+    '/_authenticated/insurance/checklist': {
+      id: '/_authenticated/insurance/checklist'
+      path: '/checklist'
+      fullPath: '/insurance/checklist'
+      preLoaderRoute: typeof AuthenticatedInsuranceChecklistRouteImport
+      parentRoute: typeof AuthenticatedInsuranceRouteRoute
+    }
     '/_authenticated/insurance/agents': {
       id: '/_authenticated/insurance/agents'
       path: '/agents'
@@ -483,6 +503,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedInsuranceRouteRouteChildren {
   AuthenticatedInsuranceAgentsRoute: typeof AuthenticatedInsuranceAgentsRoute
+  AuthenticatedInsuranceChecklistRoute: typeof AuthenticatedInsuranceChecklistRoute
   AuthenticatedInsuranceDailyOpsRoute: typeof AuthenticatedInsuranceDailyOpsRoute
   AuthenticatedInsurancePayablesRoute: typeof AuthenticatedInsurancePayablesRoute
   AuthenticatedInsurancePayrollRoute: typeof AuthenticatedInsurancePayrollRoute
@@ -495,6 +516,7 @@ interface AuthenticatedInsuranceRouteRouteChildren {
 const AuthenticatedInsuranceRouteRouteChildren: AuthenticatedInsuranceRouteRouteChildren =
   {
     AuthenticatedInsuranceAgentsRoute: AuthenticatedInsuranceAgentsRoute,
+    AuthenticatedInsuranceChecklistRoute: AuthenticatedInsuranceChecklistRoute,
     AuthenticatedInsuranceDailyOpsRoute: AuthenticatedInsuranceDailyOpsRoute,
     AuthenticatedInsurancePayablesRoute: AuthenticatedInsurancePayablesRoute,
     AuthenticatedInsurancePayrollRoute: AuthenticatedInsurancePayrollRoute,
