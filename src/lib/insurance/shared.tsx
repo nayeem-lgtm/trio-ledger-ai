@@ -305,7 +305,7 @@ export const SHEETS: Record<"sales" | "daily_ops" | "paid_qa" | "payroll" | "pay
     dateKey: null,
     report: (rows: any[]) => [{ label: "Tiers configured", value: rows.length.toString() }],
   },
-} as unknown as Record<string, SheetCfg>;
+};
 
 export type SheetKey = "sales" | "daily_ops" | "paid_qa" | "payroll" | "payables" | "agents" | "tiers";
 
