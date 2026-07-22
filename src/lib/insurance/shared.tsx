@@ -41,7 +41,7 @@ export function weekStartOf(dateIso: string | Date | null | undefined): string |
   return isoOf(d);
 }
 
-export const SHEETS = {
+export const SHEETS: Record<"sales" | "daily_ops" | "paid_qa" | "payroll" | "payables" | "agents" | "tiers", SheetCfg> = {
   sales: {
     label: "Sales & Policies",
     table: "insurance_sales",
