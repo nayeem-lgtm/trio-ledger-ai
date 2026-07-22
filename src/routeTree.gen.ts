@@ -21,6 +21,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedCategoriesRouteImport } from './routes/_authenticated/categories'
 import { Route as AuthenticatedBuyersRouteImport } from './routes/_authenticated/buyers'
 import { Route as AuthenticatedAiRouteImport } from './routes/_authenticated/ai'
+import { Route as AuthenticatedInsuranceRouteRouteImport } from './routes/_authenticated/insurance/route'
 import { Route as AuthenticatedPublishersPublisherIdRouteImport } from './routes/_authenticated/publishers.$publisherId'
 import { Route as AuthenticatedBusinessBusinessIdRouteImport } from './routes/_authenticated/business.$businessId'
 
@@ -85,6 +86,12 @@ const AuthenticatedAiRoute = AuthenticatedAiRouteImport.update({
   path: '/ai',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedInsuranceRouteRoute =
+  AuthenticatedInsuranceRouteRouteImport.update({
+    id: '/insurance',
+    path: '/insurance',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPublishersPublisherIdRoute =
   AuthenticatedPublishersPublisherIdRouteImport.update({
     id: '/$publisherId',
@@ -101,6 +108,7 @@ const AuthenticatedBusinessBusinessIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/insurance': typeof AuthenticatedInsuranceRouteRoute
   '/ai': typeof AuthenticatedAiRoute
   '/buyers': typeof AuthenticatedBuyersRoute
   '/categories': typeof AuthenticatedCategoriesRoute
@@ -116,6 +124,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/insurance': typeof AuthenticatedInsuranceRouteRoute
   '/ai': typeof AuthenticatedAiRoute
   '/buyers': typeof AuthenticatedBuyersRoute
   '/categories': typeof AuthenticatedCategoriesRoute
@@ -133,6 +142,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/insurance': typeof AuthenticatedInsuranceRouteRoute
   '/_authenticated/ai': typeof AuthenticatedAiRoute
   '/_authenticated/buyers': typeof AuthenticatedBuyersRoute
   '/_authenticated/categories': typeof AuthenticatedCategoriesRoute
@@ -150,6 +160,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/insurance'
     | '/ai'
     | '/buyers'
     | '/categories'
@@ -165,6 +176,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/insurance'
     | '/ai'
     | '/buyers'
     | '/categories'
@@ -181,6 +193,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/insurance'
     | '/_authenticated/ai'
     | '/_authenticated/buyers'
     | '/_authenticated/categories'
@@ -286,6 +299,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAiRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/insurance': {
+      id: '/_authenticated/insurance'
+      path: '/insurance'
+      fullPath: '/insurance'
+      preLoaderRoute: typeof AuthenticatedInsuranceRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/publishers/$publisherId': {
       id: '/_authenticated/publishers/$publisherId'
       path: '/$publisherId'
@@ -319,6 +339,7 @@ const AuthenticatedPublishersRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedInsuranceRouteRoute: typeof AuthenticatedInsuranceRouteRoute
   AuthenticatedAiRoute: typeof AuthenticatedAiRoute
   AuthenticatedBuyersRoute: typeof AuthenticatedBuyersRoute
   AuthenticatedCategoriesRoute: typeof AuthenticatedCategoriesRoute
@@ -332,6 +353,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedInsuranceRouteRoute: AuthenticatedInsuranceRouteRoute,
   AuthenticatedAiRoute: AuthenticatedAiRoute,
   AuthenticatedBuyersRoute: AuthenticatedBuyersRoute,
   AuthenticatedCategoriesRoute: AuthenticatedCategoriesRoute,
