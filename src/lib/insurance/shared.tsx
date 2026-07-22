@@ -307,7 +307,7 @@ export const SHEETS = {
   },
 } as unknown as Record<string, SheetCfg>;
 
-export type SheetKey = keyof typeof SHEETS;
+export type SheetKey = "sales" | "daily_ops" | "paid_qa" | "payroll" | "payables" | "agents" | "tiers";
 
 // Local money formatter to avoid a circular import at load time.
 function fmtM(n: number) {
