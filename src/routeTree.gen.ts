@@ -26,6 +26,7 @@ import { Route as AuthenticatedInsuranceIndexRouteImport } from './routes/_authe
 import { Route as AuthenticatedPublishersPublisherIdRouteImport } from './routes/_authenticated/publishers.$publisherId'
 import { Route as AuthenticatedInsuranceTiersRouteImport } from './routes/_authenticated/insurance/tiers'
 import { Route as AuthenticatedInsuranceSalesRouteImport } from './routes/_authenticated/insurance/sales'
+import { Route as AuthenticatedInsuranceQaIntakeRouteImport } from './routes/_authenticated/insurance/qa-intake'
 import { Route as AuthenticatedInsuranceQaRouteImport } from './routes/_authenticated/insurance/qa'
 import { Route as AuthenticatedInsurancePayrollRouteImport } from './routes/_authenticated/insurance/payroll'
 import { Route as AuthenticatedInsurancePayablesRouteImport } from './routes/_authenticated/insurance/payables'
@@ -125,6 +126,12 @@ const AuthenticatedInsuranceSalesRoute =
     path: '/sales',
     getParentRoute: () => AuthenticatedInsuranceRouteRoute,
   } as any)
+const AuthenticatedInsuranceQaIntakeRoute =
+  AuthenticatedInsuranceQaIntakeRouteImport.update({
+    id: '/qa-intake',
+    path: '/qa-intake',
+    getParentRoute: () => AuthenticatedInsuranceRouteRoute,
+  } as any)
 const AuthenticatedInsuranceQaRoute =
   AuthenticatedInsuranceQaRouteImport.update({
     id: '/qa',
@@ -188,6 +195,7 @@ export interface FileRoutesByFullPath {
   '/insurance/payables': typeof AuthenticatedInsurancePayablesRoute
   '/insurance/payroll': typeof AuthenticatedInsurancePayrollRoute
   '/insurance/qa': typeof AuthenticatedInsuranceQaRoute
+  '/insurance/qa-intake': typeof AuthenticatedInsuranceQaIntakeRoute
   '/insurance/sales': typeof AuthenticatedInsuranceSalesRoute
   '/insurance/tiers': typeof AuthenticatedInsuranceTiersRoute
   '/publishers/$publisherId': typeof AuthenticatedPublishersPublisherIdRoute
@@ -212,6 +220,7 @@ export interface FileRoutesByTo {
   '/insurance/payables': typeof AuthenticatedInsurancePayablesRoute
   '/insurance/payroll': typeof AuthenticatedInsurancePayrollRoute
   '/insurance/qa': typeof AuthenticatedInsuranceQaRoute
+  '/insurance/qa-intake': typeof AuthenticatedInsuranceQaIntakeRoute
   '/insurance/sales': typeof AuthenticatedInsuranceSalesRoute
   '/insurance/tiers': typeof AuthenticatedInsuranceTiersRoute
   '/publishers/$publisherId': typeof AuthenticatedPublishersPublisherIdRoute
@@ -239,6 +248,7 @@ export interface FileRoutesById {
   '/_authenticated/insurance/payables': typeof AuthenticatedInsurancePayablesRoute
   '/_authenticated/insurance/payroll': typeof AuthenticatedInsurancePayrollRoute
   '/_authenticated/insurance/qa': typeof AuthenticatedInsuranceQaRoute
+  '/_authenticated/insurance/qa-intake': typeof AuthenticatedInsuranceQaIntakeRoute
   '/_authenticated/insurance/sales': typeof AuthenticatedInsuranceSalesRoute
   '/_authenticated/insurance/tiers': typeof AuthenticatedInsuranceTiersRoute
   '/_authenticated/publishers/$publisherId': typeof AuthenticatedPublishersPublisherIdRoute
@@ -266,6 +276,7 @@ export interface FileRouteTypes {
     | '/insurance/payables'
     | '/insurance/payroll'
     | '/insurance/qa'
+    | '/insurance/qa-intake'
     | '/insurance/sales'
     | '/insurance/tiers'
     | '/publishers/$publisherId'
@@ -290,6 +301,7 @@ export interface FileRouteTypes {
     | '/insurance/payables'
     | '/insurance/payroll'
     | '/insurance/qa'
+    | '/insurance/qa-intake'
     | '/insurance/sales'
     | '/insurance/tiers'
     | '/publishers/$publisherId'
@@ -316,6 +328,7 @@ export interface FileRouteTypes {
     | '/_authenticated/insurance/payables'
     | '/_authenticated/insurance/payroll'
     | '/_authenticated/insurance/qa'
+    | '/_authenticated/insurance/qa-intake'
     | '/_authenticated/insurance/sales'
     | '/_authenticated/insurance/tiers'
     | '/_authenticated/publishers/$publisherId'
@@ -449,6 +462,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInsuranceSalesRouteImport
       parentRoute: typeof AuthenticatedInsuranceRouteRoute
     }
+    '/_authenticated/insurance/qa-intake': {
+      id: '/_authenticated/insurance/qa-intake'
+      path: '/qa-intake'
+      fullPath: '/insurance/qa-intake'
+      preLoaderRoute: typeof AuthenticatedInsuranceQaIntakeRouteImport
+      parentRoute: typeof AuthenticatedInsuranceRouteRoute
+    }
     '/_authenticated/insurance/qa': {
       id: '/_authenticated/insurance/qa'
       path: '/qa'
@@ -508,6 +528,7 @@ interface AuthenticatedInsuranceRouteRouteChildren {
   AuthenticatedInsurancePayablesRoute: typeof AuthenticatedInsurancePayablesRoute
   AuthenticatedInsurancePayrollRoute: typeof AuthenticatedInsurancePayrollRoute
   AuthenticatedInsuranceQaRoute: typeof AuthenticatedInsuranceQaRoute
+  AuthenticatedInsuranceQaIntakeRoute: typeof AuthenticatedInsuranceQaIntakeRoute
   AuthenticatedInsuranceSalesRoute: typeof AuthenticatedInsuranceSalesRoute
   AuthenticatedInsuranceTiersRoute: typeof AuthenticatedInsuranceTiersRoute
   AuthenticatedInsuranceIndexRoute: typeof AuthenticatedInsuranceIndexRoute
@@ -521,6 +542,7 @@ const AuthenticatedInsuranceRouteRouteChildren: AuthenticatedInsuranceRouteRoute
     AuthenticatedInsurancePayablesRoute: AuthenticatedInsurancePayablesRoute,
     AuthenticatedInsurancePayrollRoute: AuthenticatedInsurancePayrollRoute,
     AuthenticatedInsuranceQaRoute: AuthenticatedInsuranceQaRoute,
+    AuthenticatedInsuranceQaIntakeRoute: AuthenticatedInsuranceQaIntakeRoute,
     AuthenticatedInsuranceSalesRoute: AuthenticatedInsuranceSalesRoute,
     AuthenticatedInsuranceTiersRoute: AuthenticatedInsuranceTiersRoute,
     AuthenticatedInsuranceIndexRoute: AuthenticatedInsuranceIndexRoute,
