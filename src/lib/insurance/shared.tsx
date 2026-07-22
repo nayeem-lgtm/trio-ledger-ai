@@ -266,28 +266,25 @@ export const SHEETS: Record<"sales" | "daily_ops" | "paid_qa" | "payroll" | "pay
     },
   },
   agents: {
-    label: "Agent Master",
+    label: "Agents Information",
     table: "insurance_agents",
-    description: "Agent roster — status, pay rate, CallTools seat cost, licensed states and product focus.",
+    description: "The single source of truth for agents. Add an agent here and they automatically appear across Sales, Daily Ops, QA, Payroll and every filter.",
     cols: [
-      { key: "name", label: "Agent Name", type: "text" },
-      { key: "status", label: "Status", type: "text" },
-      { key: "role", label: "Role", type: "text" },
-      { key: "hourly_rate", label: "Hourly Rate", type: "number" },
-      { key: "calltools_seat_cost", label: "CT Seat / mo", type: "number", width: 130 },
+      { key: "name", label: "Agent Name", type: "text", width: 180 },
+      { key: "status", label: "Status", type: "text", width: 110 },
+      { key: "role", label: "Role", type: "text", width: 140 },
       { key: "licensed_states", label: "Licensed States", type: "text", width: 220 },
-      { key: "primary_carrier", label: "Primary Carrier", type: "text" },
-      { key: "product_focus", label: "Product Focus", type: "text" },
-      { key: "notes", label: "Notes", type: "text", width: 280 },
+      { key: "primary_carrier", label: "Primary Carrier", type: "text", width: 160 },
+      { key: "product_focus", label: "Product Focus", type: "text", width: 180 },
+      { key: "notes", label: "Notes", type: "text", width: 320 },
     ],
     dateKey: null,
     report: (rows: any[]) => {
       const active = rows.filter((r) => String(r.status || "").toLowerCase() === "active").length;
-      const seat = rows.reduce((s, r) => s + num(r.calltools_seat_cost), 0);
       return [
         { label: "Agents", value: rows.length.toString() },
         { label: "Active", value: active.toString(), tone: "primary" },
-        { label: "Monthly Seat Cost", value: fmtM(seat), tone: "destructive" },
+        { label: "Inactive", value: (rows.length - active).toString(), tone: "muted" },
       ];
     },
   },
