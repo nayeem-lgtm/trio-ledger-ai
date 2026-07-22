@@ -305,7 +305,7 @@ export const SHEETS = {
     dateKey: null,
     report: (rows) => [{ label: "Tiers configured", value: rows.length.toString() }],
   },
-} satisfies Record<string, SheetCfg>;
+} as unknown as Record<string, SheetCfg>;
 
 export type SheetKey = keyof typeof SHEETS;
 
