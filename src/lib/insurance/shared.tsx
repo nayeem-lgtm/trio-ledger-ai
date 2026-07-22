@@ -80,7 +80,7 @@ export const SHEETS: Record<"sales" | "daily_ops" | "paid_qa" | "payroll" | "pay
       { key: "notes", label: "Notes", type: "text", width: 220 },
     ],
     dateKey: "sale_date",
-    report: (rows, isCEO) => {
+    report: (rows: any[], isCEO: boolean) => {
       const counted = rows.filter((r) => r.count_sale !== false);
       const premium = counted.reduce((s, r) => s + num(r.monthly_premium), 0);
       const policy = counted.reduce((s, r) => s + num(r.policy_amount), 0);
@@ -134,7 +134,7 @@ export const SHEETS: Record<"sales" | "daily_ops" | "paid_qa" | "payroll" | "pay
       { key: "manager_notes", label: "Manager Notes", type: "text", width: 220 },
     ],
     dateKey: "entry_date",
-    report: (rows) => {
+    report: (rows: any[]) => {
       const incoming = rows.reduce((s, r) => s + num(r.incoming), 0);
       const connected = rows.reduce((s, r) => s + num(r.connected), 0);
       const paid = rows.reduce((s, r) => s + num(r.paid_calls), 0);
@@ -176,7 +176,7 @@ export const SHEETS: Record<"sales" | "daily_ops" | "paid_qa" | "payroll" | "pay
       { key: "notes", label: "Notes", type: "text", width: 220 },
     ],
     dateKey: "entry_date",
-    report: (rows) => {
+    report: (rows: any[]) => {
       const cost = rows.reduce((s, r) => s + num(r.paid_call_cost), 0);
       const sold = rows.filter((r) => String(r.sale_outcome || "").toLowerCase() === "sale").length;
       const cb = rows.filter((r) => r.callback_needed).length;
@@ -219,7 +219,7 @@ export const SHEETS: Record<"sales" | "daily_ops" | "paid_qa" | "payroll" | "pay
       { key: "notes", label: "Notes", type: "text", width: 220 },
     ],
     dateKey: "week_start",
-    report: (rows) => {
+    report: (rows: any[]) => {
       const base = rows.reduce((s, r) => s + num(r.base_payroll_due), 0);
       const comm = rows.reduce((s, r) => s + num(r.sales_commission), 0);
       const cost = rows.reduce((s, r) => s + num(r.total_company_cost), 0);
@@ -252,7 +252,7 @@ export const SHEETS: Record<"sales" | "daily_ops" | "paid_qa" | "payroll" | "pay
       { key: "notes", label: "Notes", type: "text", width: 260 },
     ],
     dateKey: "cost_date",
-    report: (rows) => {
+    report: (rows: any[]) => {
       const total = rows.reduce((s, r) => s + num(r.amount), 0);
       const paid = rows.filter((r) => String(r.payment_status || "").toLowerCase() === "paid").reduce((s, r) => s + num(r.amount), 0);
       const payable = rows.filter((r) => String(r.payment_status || "").toLowerCase() === "payable").reduce((s, r) => s + num(r.amount), 0);
@@ -281,7 +281,7 @@ export const SHEETS: Record<"sales" | "daily_ops" | "paid_qa" | "payroll" | "pay
       { key: "notes", label: "Notes", type: "text", width: 280 },
     ],
     dateKey: null,
-    report: (rows) => {
+    report: (rows: any[]) => {
       const active = rows.filter((r) => String(r.status || "").toLowerCase() === "active").length;
       const seat = rows.reduce((s, r) => s + num(r.calltools_seat_cost), 0);
       return [
@@ -303,7 +303,7 @@ export const SHEETS: Record<"sales" | "daily_ops" | "paid_qa" | "payroll" | "pay
       { key: "notes", label: "Notes", type: "text", width: 280 },
     ],
     dateKey: null,
-    report: (rows) => [{ label: "Tiers configured", value: rows.length.toString() }],
+    report: (rows: any[]) => [{ label: "Tiers configured", value: rows.length.toString() }],
   },
 } as unknown as Record<string, SheetCfg>;
 
