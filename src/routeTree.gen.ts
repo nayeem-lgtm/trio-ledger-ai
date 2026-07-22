@@ -24,6 +24,13 @@ import { Route as AuthenticatedAiRouteImport } from './routes/_authenticated/ai'
 import { Route as AuthenticatedInsuranceRouteRouteImport } from './routes/_authenticated/insurance/route'
 import { Route as AuthenticatedInsuranceIndexRouteImport } from './routes/_authenticated/insurance/index'
 import { Route as AuthenticatedPublishersPublisherIdRouteImport } from './routes/_authenticated/publishers.$publisherId'
+import { Route as AuthenticatedInsuranceTiersRouteImport } from './routes/_authenticated/insurance/tiers'
+import { Route as AuthenticatedInsuranceSalesRouteImport } from './routes/_authenticated/insurance/sales'
+import { Route as AuthenticatedInsuranceQaRouteImport } from './routes/_authenticated/insurance/qa'
+import { Route as AuthenticatedInsurancePayrollRouteImport } from './routes/_authenticated/insurance/payroll'
+import { Route as AuthenticatedInsurancePayablesRouteImport } from './routes/_authenticated/insurance/payables'
+import { Route as AuthenticatedInsuranceDailyOpsRouteImport } from './routes/_authenticated/insurance/daily-ops'
+import { Route as AuthenticatedInsuranceAgentsRouteImport } from './routes/_authenticated/insurance/agents'
 import { Route as AuthenticatedBusinessBusinessIdRouteImport } from './routes/_authenticated/business.$businessId'
 
 const AuthRoute = AuthRouteImport.update({
@@ -105,6 +112,48 @@ const AuthenticatedPublishersPublisherIdRoute =
     path: '/$publisherId',
     getParentRoute: () => AuthenticatedPublishersRoute,
   } as any)
+const AuthenticatedInsuranceTiersRoute =
+  AuthenticatedInsuranceTiersRouteImport.update({
+    id: '/tiers',
+    path: '/tiers',
+    getParentRoute: () => AuthenticatedInsuranceRouteRoute,
+  } as any)
+const AuthenticatedInsuranceSalesRoute =
+  AuthenticatedInsuranceSalesRouteImport.update({
+    id: '/sales',
+    path: '/sales',
+    getParentRoute: () => AuthenticatedInsuranceRouteRoute,
+  } as any)
+const AuthenticatedInsuranceQaRoute =
+  AuthenticatedInsuranceQaRouteImport.update({
+    id: '/qa',
+    path: '/qa',
+    getParentRoute: () => AuthenticatedInsuranceRouteRoute,
+  } as any)
+const AuthenticatedInsurancePayrollRoute =
+  AuthenticatedInsurancePayrollRouteImport.update({
+    id: '/payroll',
+    path: '/payroll',
+    getParentRoute: () => AuthenticatedInsuranceRouteRoute,
+  } as any)
+const AuthenticatedInsurancePayablesRoute =
+  AuthenticatedInsurancePayablesRouteImport.update({
+    id: '/payables',
+    path: '/payables',
+    getParentRoute: () => AuthenticatedInsuranceRouteRoute,
+  } as any)
+const AuthenticatedInsuranceDailyOpsRoute =
+  AuthenticatedInsuranceDailyOpsRouteImport.update({
+    id: '/daily-ops',
+    path: '/daily-ops',
+    getParentRoute: () => AuthenticatedInsuranceRouteRoute,
+  } as any)
+const AuthenticatedInsuranceAgentsRoute =
+  AuthenticatedInsuranceAgentsRouteImport.update({
+    id: '/agents',
+    path: '/agents',
+    getParentRoute: () => AuthenticatedInsuranceRouteRoute,
+  } as any)
 const AuthenticatedBusinessBusinessIdRoute =
   AuthenticatedBusinessBusinessIdRouteImport.update({
     id: '/business/$businessId',
@@ -126,6 +175,13 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/transactions': typeof AuthenticatedTransactionsRoute
   '/business/$businessId': typeof AuthenticatedBusinessBusinessIdRoute
+  '/insurance/agents': typeof AuthenticatedInsuranceAgentsRoute
+  '/insurance/daily-ops': typeof AuthenticatedInsuranceDailyOpsRoute
+  '/insurance/payables': typeof AuthenticatedInsurancePayablesRoute
+  '/insurance/payroll': typeof AuthenticatedInsurancePayrollRoute
+  '/insurance/qa': typeof AuthenticatedInsuranceQaRoute
+  '/insurance/sales': typeof AuthenticatedInsuranceSalesRoute
+  '/insurance/tiers': typeof AuthenticatedInsuranceTiersRoute
   '/publishers/$publisherId': typeof AuthenticatedPublishersPublisherIdRoute
   '/insurance/': typeof AuthenticatedInsuranceIndexRoute
 }
@@ -142,6 +198,13 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/transactions': typeof AuthenticatedTransactionsRoute
   '/business/$businessId': typeof AuthenticatedBusinessBusinessIdRoute
+  '/insurance/agents': typeof AuthenticatedInsuranceAgentsRoute
+  '/insurance/daily-ops': typeof AuthenticatedInsuranceDailyOpsRoute
+  '/insurance/payables': typeof AuthenticatedInsurancePayablesRoute
+  '/insurance/payroll': typeof AuthenticatedInsurancePayrollRoute
+  '/insurance/qa': typeof AuthenticatedInsuranceQaRoute
+  '/insurance/sales': typeof AuthenticatedInsuranceSalesRoute
+  '/insurance/tiers': typeof AuthenticatedInsuranceTiersRoute
   '/publishers/$publisherId': typeof AuthenticatedPublishersPublisherIdRoute
   '/insurance': typeof AuthenticatedInsuranceIndexRoute
 }
@@ -161,6 +224,13 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/transactions': typeof AuthenticatedTransactionsRoute
   '/_authenticated/business/$businessId': typeof AuthenticatedBusinessBusinessIdRoute
+  '/_authenticated/insurance/agents': typeof AuthenticatedInsuranceAgentsRoute
+  '/_authenticated/insurance/daily-ops': typeof AuthenticatedInsuranceDailyOpsRoute
+  '/_authenticated/insurance/payables': typeof AuthenticatedInsurancePayablesRoute
+  '/_authenticated/insurance/payroll': typeof AuthenticatedInsurancePayrollRoute
+  '/_authenticated/insurance/qa': typeof AuthenticatedInsuranceQaRoute
+  '/_authenticated/insurance/sales': typeof AuthenticatedInsuranceSalesRoute
+  '/_authenticated/insurance/tiers': typeof AuthenticatedInsuranceTiersRoute
   '/_authenticated/publishers/$publisherId': typeof AuthenticatedPublishersPublisherIdRoute
   '/_authenticated/insurance/': typeof AuthenticatedInsuranceIndexRoute
 }
@@ -180,6 +250,13 @@ export interface FileRouteTypes {
     | '/settings'
     | '/transactions'
     | '/business/$businessId'
+    | '/insurance/agents'
+    | '/insurance/daily-ops'
+    | '/insurance/payables'
+    | '/insurance/payroll'
+    | '/insurance/qa'
+    | '/insurance/sales'
+    | '/insurance/tiers'
     | '/publishers/$publisherId'
     | '/insurance/'
   fileRoutesByTo: FileRoutesByTo
@@ -196,6 +273,13 @@ export interface FileRouteTypes {
     | '/settings'
     | '/transactions'
     | '/business/$businessId'
+    | '/insurance/agents'
+    | '/insurance/daily-ops'
+    | '/insurance/payables'
+    | '/insurance/payroll'
+    | '/insurance/qa'
+    | '/insurance/sales'
+    | '/insurance/tiers'
     | '/publishers/$publisherId'
     | '/insurance'
   id:
@@ -214,6 +298,13 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/transactions'
     | '/_authenticated/business/$businessId'
+    | '/_authenticated/insurance/agents'
+    | '/_authenticated/insurance/daily-ops'
+    | '/_authenticated/insurance/payables'
+    | '/_authenticated/insurance/payroll'
+    | '/_authenticated/insurance/qa'
+    | '/_authenticated/insurance/sales'
+    | '/_authenticated/insurance/tiers'
     | '/_authenticated/publishers/$publisherId'
     | '/_authenticated/insurance/'
   fileRoutesById: FileRoutesById
@@ -331,6 +422,55 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPublishersPublisherIdRouteImport
       parentRoute: typeof AuthenticatedPublishersRoute
     }
+    '/_authenticated/insurance/tiers': {
+      id: '/_authenticated/insurance/tiers'
+      path: '/tiers'
+      fullPath: '/insurance/tiers'
+      preLoaderRoute: typeof AuthenticatedInsuranceTiersRouteImport
+      parentRoute: typeof AuthenticatedInsuranceRouteRoute
+    }
+    '/_authenticated/insurance/sales': {
+      id: '/_authenticated/insurance/sales'
+      path: '/sales'
+      fullPath: '/insurance/sales'
+      preLoaderRoute: typeof AuthenticatedInsuranceSalesRouteImport
+      parentRoute: typeof AuthenticatedInsuranceRouteRoute
+    }
+    '/_authenticated/insurance/qa': {
+      id: '/_authenticated/insurance/qa'
+      path: '/qa'
+      fullPath: '/insurance/qa'
+      preLoaderRoute: typeof AuthenticatedInsuranceQaRouteImport
+      parentRoute: typeof AuthenticatedInsuranceRouteRoute
+    }
+    '/_authenticated/insurance/payroll': {
+      id: '/_authenticated/insurance/payroll'
+      path: '/payroll'
+      fullPath: '/insurance/payroll'
+      preLoaderRoute: typeof AuthenticatedInsurancePayrollRouteImport
+      parentRoute: typeof AuthenticatedInsuranceRouteRoute
+    }
+    '/_authenticated/insurance/payables': {
+      id: '/_authenticated/insurance/payables'
+      path: '/payables'
+      fullPath: '/insurance/payables'
+      preLoaderRoute: typeof AuthenticatedInsurancePayablesRouteImport
+      parentRoute: typeof AuthenticatedInsuranceRouteRoute
+    }
+    '/_authenticated/insurance/daily-ops': {
+      id: '/_authenticated/insurance/daily-ops'
+      path: '/daily-ops'
+      fullPath: '/insurance/daily-ops'
+      preLoaderRoute: typeof AuthenticatedInsuranceDailyOpsRouteImport
+      parentRoute: typeof AuthenticatedInsuranceRouteRoute
+    }
+    '/_authenticated/insurance/agents': {
+      id: '/_authenticated/insurance/agents'
+      path: '/agents'
+      fullPath: '/insurance/agents'
+      preLoaderRoute: typeof AuthenticatedInsuranceAgentsRouteImport
+      parentRoute: typeof AuthenticatedInsuranceRouteRoute
+    }
     '/_authenticated/business/$businessId': {
       id: '/_authenticated/business/$businessId'
       path: '/business/$businessId'
@@ -342,11 +482,25 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedInsuranceRouteRouteChildren {
+  AuthenticatedInsuranceAgentsRoute: typeof AuthenticatedInsuranceAgentsRoute
+  AuthenticatedInsuranceDailyOpsRoute: typeof AuthenticatedInsuranceDailyOpsRoute
+  AuthenticatedInsurancePayablesRoute: typeof AuthenticatedInsurancePayablesRoute
+  AuthenticatedInsurancePayrollRoute: typeof AuthenticatedInsurancePayrollRoute
+  AuthenticatedInsuranceQaRoute: typeof AuthenticatedInsuranceQaRoute
+  AuthenticatedInsuranceSalesRoute: typeof AuthenticatedInsuranceSalesRoute
+  AuthenticatedInsuranceTiersRoute: typeof AuthenticatedInsuranceTiersRoute
   AuthenticatedInsuranceIndexRoute: typeof AuthenticatedInsuranceIndexRoute
 }
 
 const AuthenticatedInsuranceRouteRouteChildren: AuthenticatedInsuranceRouteRouteChildren =
   {
+    AuthenticatedInsuranceAgentsRoute: AuthenticatedInsuranceAgentsRoute,
+    AuthenticatedInsuranceDailyOpsRoute: AuthenticatedInsuranceDailyOpsRoute,
+    AuthenticatedInsurancePayablesRoute: AuthenticatedInsurancePayablesRoute,
+    AuthenticatedInsurancePayrollRoute: AuthenticatedInsurancePayrollRoute,
+    AuthenticatedInsuranceQaRoute: AuthenticatedInsuranceQaRoute,
+    AuthenticatedInsuranceSalesRoute: AuthenticatedInsuranceSalesRoute,
+    AuthenticatedInsuranceTiersRoute: AuthenticatedInsuranceTiersRoute,
     AuthenticatedInsuranceIndexRoute: AuthenticatedInsuranceIndexRoute,
   }
 
