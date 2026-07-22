@@ -14,6 +14,8 @@ import {
   ChevronRight,
   ArrowLeft,
   LogOut,
+  ListChecks,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,10 +33,12 @@ const NAV = [
   { to: "/insurance/sales", label: "Sales & Policies", icon: Table2, group: "Reports" },
   { to: "/insurance/daily-ops", label: "Daily Ops", icon: PhoneCall, group: "Reports" },
   { to: "/insurance/qa", label: "Paid Call QA", icon: ClipboardCheck, group: "Reports" },
+  { to: "/insurance/qa-intake", label: "QA Intake Form", icon: FileText, group: "Reports" },
   { to: "/insurance/payroll", label: "Payroll", icon: Wallet, group: "Operations" },
   { to: "/insurance/payables", label: "Company Payables", icon: Receipt, group: "Operations" },
-  { to: "/insurance/agents", label: "Agent Master", icon: UserCog, group: "Operations" },
+  { to: "/insurance/agents", label: "Agents Information", icon: UserCog, group: "Operations" },
   { to: "/insurance/tiers", label: "Commission Tiers", icon: Shield, group: "Operations" },
+  { to: "/insurance/checklist", label: "Default Checklist", icon: ListChecks, group: "Operations" },
 ] as const;
 
 export function InsuranceShell({ children }: { children?: ReactNode }) {
