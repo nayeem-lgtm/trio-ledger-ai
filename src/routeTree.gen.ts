@@ -22,6 +22,7 @@ import { Route as AuthenticatedCategoriesRouteImport } from './routes/_authentic
 import { Route as AuthenticatedBuyersRouteImport } from './routes/_authenticated/buyers'
 import { Route as AuthenticatedAiRouteImport } from './routes/_authenticated/ai'
 import { Route as AuthenticatedInsuranceRouteRouteImport } from './routes/_authenticated/insurance/route'
+import { Route as AuthenticatedInsuranceIndexRouteImport } from './routes/_authenticated/insurance/index'
 import { Route as AuthenticatedPublishersPublisherIdRouteImport } from './routes/_authenticated/publishers.$publisherId'
 import { Route as AuthenticatedBusinessBusinessIdRouteImport } from './routes/_authenticated/business.$businessId'
 
@@ -92,6 +93,12 @@ const AuthenticatedInsuranceRouteRoute =
     path: '/insurance',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedInsuranceIndexRoute =
+  AuthenticatedInsuranceIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedInsuranceRouteRoute,
+  } as any)
 const AuthenticatedPublishersPublisherIdRoute =
   AuthenticatedPublishersPublisherIdRouteImport.update({
     id: '/$publisherId',
@@ -108,7 +115,7 @@ const AuthenticatedBusinessBusinessIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/insurance': typeof AuthenticatedInsuranceRouteRoute
+  '/insurance': typeof AuthenticatedInsuranceRouteRouteWithChildren
   '/ai': typeof AuthenticatedAiRoute
   '/buyers': typeof AuthenticatedBuyersRoute
   '/categories': typeof AuthenticatedCategoriesRoute
@@ -120,11 +127,11 @@ export interface FileRoutesByFullPath {
   '/transactions': typeof AuthenticatedTransactionsRoute
   '/business/$businessId': typeof AuthenticatedBusinessBusinessIdRoute
   '/publishers/$publisherId': typeof AuthenticatedPublishersPublisherIdRoute
+  '/insurance/': typeof AuthenticatedInsuranceIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/insurance': typeof AuthenticatedInsuranceRouteRoute
   '/ai': typeof AuthenticatedAiRoute
   '/buyers': typeof AuthenticatedBuyersRoute
   '/categories': typeof AuthenticatedCategoriesRoute
@@ -136,13 +143,14 @@ export interface FileRoutesByTo {
   '/transactions': typeof AuthenticatedTransactionsRoute
   '/business/$businessId': typeof AuthenticatedBusinessBusinessIdRoute
   '/publishers/$publisherId': typeof AuthenticatedPublishersPublisherIdRoute
+  '/insurance': typeof AuthenticatedInsuranceIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/_authenticated/insurance': typeof AuthenticatedInsuranceRouteRoute
+  '/_authenticated/insurance': typeof AuthenticatedInsuranceRouteRouteWithChildren
   '/_authenticated/ai': typeof AuthenticatedAiRoute
   '/_authenticated/buyers': typeof AuthenticatedBuyersRoute
   '/_authenticated/categories': typeof AuthenticatedCategoriesRoute
@@ -154,6 +162,7 @@ export interface FileRoutesById {
   '/_authenticated/transactions': typeof AuthenticatedTransactionsRoute
   '/_authenticated/business/$businessId': typeof AuthenticatedBusinessBusinessIdRoute
   '/_authenticated/publishers/$publisherId': typeof AuthenticatedPublishersPublisherIdRoute
+  '/_authenticated/insurance/': typeof AuthenticatedInsuranceIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -172,11 +181,11 @@ export interface FileRouteTypes {
     | '/transactions'
     | '/business/$businessId'
     | '/publishers/$publisherId'
+    | '/insurance/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
-    | '/insurance'
     | '/ai'
     | '/buyers'
     | '/categories'
@@ -188,6 +197,7 @@ export interface FileRouteTypes {
     | '/transactions'
     | '/business/$businessId'
     | '/publishers/$publisherId'
+    | '/insurance'
   id:
     | '__root__'
     | '/'
@@ -205,6 +215,7 @@ export interface FileRouteTypes {
     | '/_authenticated/transactions'
     | '/_authenticated/business/$businessId'
     | '/_authenticated/publishers/$publisherId'
+    | '/_authenticated/insurance/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -306,6 +317,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInsuranceRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/insurance/': {
+      id: '/_authenticated/insurance/'
+      path: '/'
+      fullPath: '/insurance/'
+      preLoaderRoute: typeof AuthenticatedInsuranceIndexRouteImport
+      parentRoute: typeof AuthenticatedInsuranceRouteRoute
+    }
     '/_authenticated/publishers/$publisherId': {
       id: '/_authenticated/publishers/$publisherId'
       path: '/$publisherId'
@@ -323,6 +341,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedInsuranceRouteRouteChildren {
+  AuthenticatedInsuranceIndexRoute: typeof AuthenticatedInsuranceIndexRoute
+}
+
+const AuthenticatedInsuranceRouteRouteChildren: AuthenticatedInsuranceRouteRouteChildren =
+  {
+    AuthenticatedInsuranceIndexRoute: AuthenticatedInsuranceIndexRoute,
+  }
+
+const AuthenticatedInsuranceRouteRouteWithChildren =
+  AuthenticatedInsuranceRouteRoute._addFileChildren(
+    AuthenticatedInsuranceRouteRouteChildren,
+  )
+
 interface AuthenticatedPublishersRouteChildren {
   AuthenticatedPublishersPublisherIdRoute: typeof AuthenticatedPublishersPublisherIdRoute
 }
@@ -339,7 +371,7 @@ const AuthenticatedPublishersRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedInsuranceRouteRoute: typeof AuthenticatedInsuranceRouteRoute
+  AuthenticatedInsuranceRouteRoute: typeof AuthenticatedInsuranceRouteRouteWithChildren
   AuthenticatedAiRoute: typeof AuthenticatedAiRoute
   AuthenticatedBuyersRoute: typeof AuthenticatedBuyersRoute
   AuthenticatedCategoriesRoute: typeof AuthenticatedCategoriesRoute
@@ -353,7 +385,8 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedInsuranceRouteRoute: AuthenticatedInsuranceRouteRoute,
+  AuthenticatedInsuranceRouteRoute:
+    AuthenticatedInsuranceRouteRouteWithChildren,
   AuthenticatedAiRoute: AuthenticatedAiRoute,
   AuthenticatedBuyersRoute: AuthenticatedBuyersRoute,
   AuthenticatedCategoriesRoute: AuthenticatedCategoriesRoute,
